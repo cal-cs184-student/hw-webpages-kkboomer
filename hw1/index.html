@@ -67,7 +67,7 @@
 			</p>
 			<bold-text><i>basic/test4.svg</i></bold-text>
 			<figure>
-				<img src="screenshots/task_1.png" alt="basic/test4.svg" style="width:70%"/>
+				<img src="write_up/task_1.png" alt="basic/test4.svg" style="width:70%"/>
 				<figcaption>Observe the "jaggedness" for the triangle edges!</figcaption>
 			</figure>
 			<h3>EC optimizations</h3>
@@ -80,7 +80,7 @@
 			</p>
 			<bold-text><i>Graph results</i></bold-text>
 			<figure>
-				<img src="screenshots/graph.png" alt="basic/graph.svg" style="width:70%"/>
+				<img src="write_up/graph.png" alt="basic/graph.svg" style="width:70%"/>
 				<figcaption>A showcase of the effect of the optimization on basic rendering</figcaption>
 			</figure>
 
@@ -117,17 +117,17 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="screenshots/task_2_1px.png" width="400px"/>
+							<img src="write_up/task2_1.png" width="400px"/>
 							<figcaption>sampling rate 1 per pixel</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="screenshots/task_2_4px.png" width="400px"/>
+							<img src="write_up/task2_4.png" width="400px"/>
 							<figcaption>sampling rate 4 per pixel</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="screenshots/task_2_16px.png" width="400px"/>
+							<img src="write_up/task2_16.png" width="400px"/>
 							<figcaption>sampling rate 16 per pixel</figcaption>
 						</td>
 					</tr>
@@ -135,7 +135,7 @@
 			</div>
 
 			<br>
-			<bold-text><i>explaination of results:</i></bold-text>
+			<bold-text><i>Explaination of results:</i></bold-text>
 			<p>We can see that as the sampling rate per pixel increases, the averaging of neighboring pixels becomes more apparent. When we sample 1 per pixel, there are missing gaps and artifacts as a result of this aliasing.
 				As we increase the sampling rate, the averaging step that we perform in <code>RasterizerImp::resolve_to_framebuffer</code> helps "fill" in the gap to provide a more smooth edge so that it looks more continuous.
 				Since we are subdividing a pixel into more squares, when we average it acts like a <b>low pass filter</b> so that the averaged pixel smooths out sharp discontinuities and reduces high frequencies.</p>
@@ -143,7 +143,7 @@
 			<h2>Task 3: Transforms </h2>
 
 			<figure>
-				<img src="screenshots/my_robot.png" style="width:70%"/>
+				<img src="write_up/task3.png" style="width:70%"/>
 				<figcaption>K-Robot</figcaption>
 			</figure>
 
@@ -166,12 +166,12 @@
 				while one in the middle, with alpha, beta, and gamma being nearly equal, is mix of all 3 colors.
 			</p>
 			<figure>
-				<img src="screenshots/task4_aid.png" style="width:70%"/>
+				<img src="write_up/task4_aid.png" style="width:70%"/>
 				<figcaption>A triangle with red, green, and blue vertices that when using barycentric
 					interpolation the blending of colors is apparent.</figcaption>
 			</figure>
 			<figure>
-				<img src="screenshots/task_4.png" style="width:70%"/>
+				<img src="write_up/task4.png" style="width:70%"/>
 				<figcaption>Color wheel, which is a bunch of RGB vertex trinagles in a circular pattern</figcaption>
 			</figure>
 			<h2>Task 5: “Pixel sampling” for texture mapping</h2>
@@ -201,27 +201,27 @@
 				I used texmap/test1.svg for all 4 screenshots
 			</p>
 
-			<bold-text><i>Nearest Neighbor Sampling 1 sample per pixel </i></bold-text>
+			<bold-text><i>Nearest Neighbor Sampling 1 sample per px </i></bold-text>
 			<figure>
-				<img src="screenshots/nearest_1spp.png" style="width:70%"/>
+				<img src="write_up/task5_n1.png" style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
 			<bold-text><i>Bilinear Sampling 1 sample per pixel </i></bold-text>
 			<figure>
-				<img src="screenshots/bilinear_1spp.png"  style="width:70%"/>
+				<img src="write_up/task5_b1.png"  style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
 			<bold-text><i>Nearest Neighbor Sampling 16 sample per pixel </i></bold-text>
 			<figure>
-				<img src="screenshots/nearest_16spp.png" style="width:70%"/>
+				<img src="write_up/task5_n16.png" style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
 			<bold-text><i>Bilinear Sampling 16 sample per pixel </i></bold-text>
 			<figure>
-				<img src="screenshots/bilinear_16spp.png" style="width:70%"/>
+				<img src="write_up/task5_b16	.png" style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
@@ -274,7 +274,7 @@
 				</ul>
 			</ol>
 
-			<bold-text><i>Image of the Apple Park rainbow shown in different combinations of lsm and psm:</i></bold-text>
+			<bold-text><i>Image of the a tile shown with differing lsm/psm combinations:</i></bold-text>
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
