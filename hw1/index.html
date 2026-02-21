@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Kellen Galban</div>
 
 		<br>
 
@@ -36,12 +36,9 @@
 		
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://github.com/cal-cs184-student/hw1-rasterizer-aloharender">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: (TODO) <a href="https://github.com/cal-cs184-student/hw1-rasterizer-aloharender" target="_blank">cs184.eecs.berkeley.edu/sp25</a>
 
-		<figure>
-			<img src="images/image1.png" alt="Lion" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+		
 
 		<!--
 		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
@@ -49,7 +46,7 @@
 
 		<h2>Overview</h2>
 		Over the past few weeks and 6 tasks I was able to implement a basic rasterizer that can take SVG files and accurately render them out
-			using a variety of techniques. This rasterizer can perform basic supersampling to help deal with aliasing up to 16x, perform barycentric interpolation, and use
+			using a variety of techniques. This rasterizer can perform basic super-sampling to help deal with aliasing up to 16x, perform barycentric interpolation, and use
 			level and pixel sampling to map textures to surfaces at various antialiasing levels. I had a lot of fun getting back into C++ and
 			seeing how to implement the high level mathematical concepts learned in class into code (though my git commit messages suggest there was some pain along the way :)).
 
@@ -67,7 +64,7 @@
 			</p>
 			<bold-text><i>basic/test4.svg</i></bold-text>
 			<figure>
-				<img src="write_up/task_1.png" alt="basic/test4.svg" style="width:70%"/>
+				<img src="write_up/task1_new.png" alt="basic/test4.svg" style="width:70%"/>
 				<figcaption>Observe the "jaggedness" for the triangle edges!</figcaption>
 			</figure>
 			<h3>EC optimizations</h3>
@@ -107,11 +104,11 @@
 				</ul>
 				<li>Averaging pixels in <code>RasterizerImp::resolve_to_framebuffer</code>:</li>
 				<ul>
-					<li>The final step of supersampling is to average the neighboring pixels and set it back to the main pixel. In <code>RasterizerImp::resolve_to_framebuffer</code>, we are taking the average color rgb values from all the supersampled pixels of area \(sample\_rate\) to set it to the pixel in the framebuffer representing all of the supersampled pixels.</li>
+					<li>The final step of super-sampling is to average the neighboring pixels and set it back to the main pixel. In <code>RasterizerImp::resolve_to_framebuffer</code>, we are taking the average color rgb values from all the supersampled pixels of area \(sample\_rate\) to set it to the pixel in the framebuffer representing all of the supersampled pixels.</li>
 				</ul>
 			</ol>
 
-			<bold-text><i>basic/test4.svg supersampling rate comparisons:</i></bold-text>
+			<bold-text><i>basic/test4.svg super-sampling rate comparisons:</i></bold-text>
 
 			<div style="display: flex; flex-direction: column; align-items: center;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -135,7 +132,7 @@
 			</div>
 
 			<br>
-			<bold-text><i>Explaination of results:</i></bold-text>
+			<bold-text><i>Explanation of results:</i></bold-text>
 			<p>We can see that as the sampling rate per pixel increases, the averaging of neighboring pixels becomes more apparent. When we sample 1 per pixel, there are missing gaps and artifacts as a result of this aliasing.
 				As we increase the sampling rate, the averaging step that we perform in <code>RasterizerImp::resolve_to_framebuffer</code> helps "fill" in the gap to provide a more smooth edge so that it looks more continuous.
 				Since we are subdividing a pixel into more squares, when we average it acts like a <b>low pass filter</b> so that the averaged pixel smooths out sharp discontinuities and reduces high frequencies.</p>
@@ -172,7 +169,7 @@
 			</figure>
 			<figure>
 				<img src="write_up/task4.png" style="width:70%"/>
-				<figcaption>Color wheel, which is a bunch of RGB vertex trinagles in a circular pattern</figcaption>
+				<figcaption>Color wheel, which is a bunch of RGB vertex triangles in a circular pattern</figcaption>
 			</figure>
 			<h2>Task 5: “Pixel sampling” for texture mapping</h2>
 
@@ -207,21 +204,21 @@
 				<figcaption></figcaption>
 			</figure>
 
-			<bold-text><i>Bilinear Sampling 1 sample per pixel </i></bold-text>
+			<bold-text><i>Bilinear Sampling 1 sample per px </i></bold-text>
 			<figure>
 				<img src="write_up/task5_b1.png"  style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
-			<bold-text><i>Nearest Neighbor Sampling 16 sample per pixel </i></bold-text>
+			<bold-text><i>Nearest Neighbor Sampling 16 sample per px </i></bold-text>
 			<figure>
 				<img src="write_up/task5_n16.png" style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
-			<bold-text><i>Bilinear Sampling 16 sample per pixel </i></bold-text>
+			<bold-text><i>Bilinear Sampling 16 sample per px </i></bold-text>
 			<figure>
-				<img src="write_up/task5_b16	.png" style="width:70%"/>
+				<img src="write_up/task5_b16.png" style="width:70%"/>
 				<figcaption></figcaption>
 			</figure>
 
@@ -279,21 +276,21 @@
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
 						<td style="text-align: center;">
-							<img src="screenshots/l_zero_p_nearest.png" width="400px"/>
+							<img src="write_up/task6_0n.png" width="400px"/>
 							<figcaption>L_ZERO, P_NEAREST</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="screenshots/l_zero_p_linear.png" width="400px"/>
+							<img src="write_up/task6_0b.png" width="400px"/>
 							<figcaption>L_ZERO, P_LINEAR</figcaption>
 						</td>
 					</tr>
 					<tr>
 						<td style="text-align: center;">
-							<img src="screenshots/l_nearest_p_nearest.png" width="400px"/>
+							<img src="write_up/task6_nn.png" width="400px"/>
 							<figcaption>L_NEAREST, P_NEAREST</figcaption>
 						</td>
 						<td style="text-align: center;">
-							<img src="screenshots/l_nearest_p_linear.png" width="400px"/>
+							<img src="write_up/task6_nb.png" width="400px"/>
 							<figcaption>L_NEAREST, P_LINEAR</figcaption>
 						</td>
 					</tr>
