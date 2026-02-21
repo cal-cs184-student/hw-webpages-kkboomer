@@ -83,30 +83,16 @@
 
 			<h2>Task 2: Antialiasing by Supersampling</h2>
 
-			<bold-text>How did we supersample? </bold-text> <br><br>
-			<ol>
-				<li>The main idea behind supersampling is to partition each individual pixel into smaller sections so that we can increase the sampling density, resulting in a more finer detail output.</li>
-				<ul>
-					<li>To draw the actual pixels on to the screen, a section of the rasterization pipeline includes resolving the sample buffer to the framebuffer.
-						The sample buffer contains CGL Color data types; however, the framebuffer is an array of floats so "resolving" simply means converting the Color types into floats. </li>
-					<li>When we supersample, we can increase or decrease the sampling rate. To accomodate the sampling rate change, we have to modify a couple of places. First, we have to adjust the size of the sample_buffer depending on the sampling rate. In <code>RasterizerImp::set_sample_rate</code> we resize the sample buffer to <code>sample_rate * width * height</code>. We do the same in <code>RasterizerImp::set_framebuffer_target</code>.</li>
-					<li>In our main rasterization logic in <code>RasterizerImp::rasterize_triangle</code>, we multiply our loop start and end bounds by <code>sqrt(sample_rate)</code> to increase/decrease the density of the grid. To calculate the new coordinate of the sample point, we need to additionally find the inner offset of supersample pixel in relation to the main coordinate before we supersampled.</li>
-					<ul>
-						<li>Pixel coordinate (without supersample offset): \((\frac{x}{\sqrt{sample\_rate}}, \frac{y}{\sqrt{sample\_rate}})\)</li>
-						<li>Supersample offset: \((x \bmod \sqrt{sample\_rate}, y \bmod \sqrt{sample\_rate}) \)</li>
-					</ul>
-					<ul>Putting it all together, our supersample pixel coordinate would is \((pixel\_x + \frac{(ss\_offset\_x + 0.5f)}{\sqrt{sample\_rate}}, pixel\_y + \frac{(ss\_offset\_y + 0.5f)}{\sqrt{sample\_rate}})\)</ul>
-					<ul>To set the correct index in the sample buffer, the updated index is \((y * width + x) * sample\_rate + ss\_offset\_y * \sqrt{sample\_rate} + ss_offset_x\) </ul>
-				</ul>
-				<li>Modifying <code>RasterizerImp::fill_pixel</code>:</li>
-				<ul>
-					<li>For a pixel, we need to fill in all of the supersampled pixels to fix points and lines as we don't really care about supersampling for them. So within this function, we just fill the supersample pixels the same color.</li>
-				</ul>
-				<li>Averaging pixels in <code>RasterizerImp::resolve_to_framebuffer</code>:</li>
-				<ul>
-					<li>The final step of super-sampling is to average the neighboring pixels and set it back to the main pixel. In <code>RasterizerImp::resolve_to_framebuffer</code>, we are taking the average color rgb values from all the supersampled pixels of area \(sample\_rate\) to set it to the pixel in the framebuffer representing all of the supersampled pixels.</li>
-				</ul>
-			</ol>
+			<p>
+				Supersampling is the process of partitioning the pixel into subpixels and sampling those subpositions, and by increasing the sampling density we get a more accurate render of what is and is outside the triangle. 
+				In order to implement super-sampling, we update <code>RasterizerImp::set_sample_rate</code> to allow us to update the sample rate, 
+				<code>RasterizerImp::set_framebuffer_target</code> resizing the framebuffer to be the width and the height multiplied by the new sample rate. 
+				Now the sample buffer stores one color per subpixel. In the <code>RasterizerImp::rasterize_triangle</code> function I added 2 more for loops, 
+				that loop for \(sqrt(sample rate)\) times each, and perform the same checks from Task 1. We create new sampling points nx and ny, \(nx=x+(sx+0.5)/ sqrt(sample rate)\) and similar for ny. 
+They now see if this point nx or ny is in the triangle using the edge tests. Now instead of calling fill pixel, we just add straight to the framebuffer at base + sy * N + sx, where base is equal to \((y * width + x) * samplerate\) 
+and N is just the square root of the sample rate. <code>resolve_to_framebuffer</code>, we perform color averaging by summing the colors in the given range and dividing by the sample rate.
+
+			</p>
 
 			<bold-text><i>basic/test4.svg super-sampling rate comparisons:</i></bold-text>
 
@@ -134,14 +120,9 @@
 			<br>
 			<bold-text><i>Explanation of results:</i></bold-text>
 			<p>
-				As we increase the sampling rate, the edges of the triangles become smoother and less jagged, with the difference being more apparent on thinner edges. 
-				This is because with a higher sampling rate and the modifications to <code>RasterizerImp::resolve_to_framebuffer</code>, the averaging of neighboring pixels helps to "fill" in the gaps that would otherwise be present when sampling at a lower rate, 
-				resulting in smoother edges and a more accurate representation of the original triangle.
-				When we sample at 1 per pixel, we are essentially taking a single point to represent the entire pixel, which can lead to jagged edges and gaps in the rendering. As we increase the sampling rate, we are able to capture more of the details of the triangle's edges, resulting in smoother and more accurate rendering.
-			</p>
-			<p>We can see that as the sampling rate per pixel increases, the averaging of neighboring pixels becomes more apparent. When we sample 1 per pixel, there are missing gaps and artifacts as a result of this aliasing.
-				As we increase the sampling rate, the averaging step that we perform in <code>RasterizerImp::resolve_to_framebuffer</code> helps "fill" in the gap to provide a more smooth edge so that it looks more continuous.
-				Since we are subdividing a pixel into more squares, when we average it acts like a <b>low pass filter</b> so that the averaged pixel smooths out sharp discontinuities and reduces high frequencies.
+				Now that we are sampling subpixels, we are able to more accurately judge whether a pixel is inside of the triangle or not. 
+				Now for every pixel, if any subpixel is inside the bounds of the triangle, they will be colored as an average between the subpixels,
+				easing the transition between colors as well as reducing jagged edges since they will also get smoothed down by the averaging process.</p>
 			</p>
 
 			<h2>Task 3: Transforms </h2>
