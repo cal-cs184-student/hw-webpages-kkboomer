@@ -32,7 +32,7 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: (TODO) <a href="https://cal-cs184-student.github.io/hw-webpages-kkboomer/">https://cal-cs184-student.github.io/hw-webpages-kkboomer/</a>
 		
 		<br>
 
@@ -52,7 +52,7 @@
 
 			<h2>Task 1: Drawing Single-Color Triangles</h2>
 
-			<p>Given 3 points, we first reduce the area of the bounding box by finding the maximum and minimum x and y values from the points passed in.
+			<p>Inside <code>RasterizerImp::rasterize_triangle</code> and given 3 points, we first reduce the area of the bounding box by finding the maximum and minimum x and y values from the points passed in.
 				Then for each x and y position, we sample at the center of the pixel (an offset of 1/2 from the x or y position), then perform 3 half plane checks to see if the point is within the triangle.
 				Since we need to be able to deal with either cw or ccw winding order, we check if all edge checks or either all \(<= 0\) or \(>= 0\), if either is true, we can be sure that the pixel is inside the triangle and we color it.
 			</p>
@@ -65,14 +65,14 @@
 			<bold-text><i>basic/test4.svg</i></bold-text>
 			<figure>
 				<img src="write_up/task1_new.png" alt="basic/test4.svg" style="width:70%"/>
-				<figcaption>Observe the "jaggedness" for the triangle edges!</figcaption>
+				<figcaption>Note how the thinner edges have severe aliasing and gaps</figcaption>
 			</figure>
 			<h3>EC optimizations</h3>
 			<p>
 				In terms of optimizations, previously I computed the edge tests for every point from scratch inside the loop,
-				which especially when supersampling came into the picture would slow down rendering. Since the edge checks are linear functions of the form \( Ax + By + C\), we can just increment the As and Bs as the loop progresses and cut out expensive multiplication calculations,
+				which especially when super-sampling came into the picture would slow down rendering. Since the edge checks are linear functions of the form \( Ax + By + C\), we can just increment the As and Bs as the loop progresses and cut out expensive multiplication calculations,
 				I found that by and by only putting simple calculations inside the loops we cut down our computation and see the following gains. I did consider putting similar optimizations inside
-				tasks 4 and 5/6. However, after encountering some funky artifacts that took too long to even diagnose, they were scrapped, which explains why supersampling on test7.svg or anything in the texmap folder take much longer than anything in the basic folder.
+				tasks 4 and 5/6. However, after encountering some funky artifacts that took too long to even diagnose, they were scrapped, which explains why super-sampling on test7.svg or anything in the texmap folder take much longer than anything in the basic folder.
 				A future goal is to return to those functions and implement those optimizations.
 			</p>
 			<bold-text><i>Graph results</i></bold-text>
@@ -133,9 +133,16 @@
 
 			<br>
 			<bold-text><i>Explanation of results:</i></bold-text>
+			<p>
+				As we increase the sampling rate, the edges of the triangles become smoother and less jagged, with the difference being more apparent on thinner edges. 
+				This is because with a higher sampling rate and the modifications to <code>RasterizerImp::resolve_to_framebuffer</code>, the averaging of neighboring pixels helps to "fill" in the gaps that would otherwise be present when sampling at a lower rate, 
+				resulting in smoother edges and a more accurate representation of the original triangle.
+				When we sample at 1 per pixel, we are essentially taking a single point to represent the entire pixel, which can lead to jagged edges and gaps in the rendering. As we increase the sampling rate, we are able to capture more of the details of the triangle's edges, resulting in smoother and more accurate rendering.
+			</p>
 			<p>We can see that as the sampling rate per pixel increases, the averaging of neighboring pixels becomes more apparent. When we sample 1 per pixel, there are missing gaps and artifacts as a result of this aliasing.
 				As we increase the sampling rate, the averaging step that we perform in <code>RasterizerImp::resolve_to_framebuffer</code> helps "fill" in the gap to provide a more smooth edge so that it looks more continuous.
-				Since we are subdividing a pixel into more squares, when we average it acts like a <b>low pass filter</b> so that the averaged pixel smooths out sharp discontinuities and reduces high frequencies.</p>
+				Since we are subdividing a pixel into more squares, when we average it acts like a <b>low pass filter</b> so that the averaged pixel smooths out sharp discontinuities and reduces high frequencies.
+			</p>
 
 			<h2>Task 3: Transforms </h2>
 
@@ -147,7 +154,7 @@
 			<bold-text> What is being done to the robot </bold-text> <br><br>
 			<p>
 				I performed a simple transformation by rotating every limb except the left leg to form a k shape with
-				the robot. since some of the rotation points are not at the points where the limbs are closest to the
+				the robot. Since some of the rotation points are not at the points where the limbs are closest to the
 				torso, I had to perform slight translations to get the limbs to line back up with the body.
 			</p>
 			<h2>Task 4: Barycentric coordinates</h2>
@@ -173,7 +180,6 @@
 			</figure>
 			<h2>Task 5: “Pixel sampling” for texture mapping</h2>
 
-			<bold-text>Explain pixel sampling in your own words and describe how you implemented it to perform texture mapping. </bold-text> <br><br>
 			<p>
 				Pixel sampling is how we determine the color of a pixel when using continuous textures onto a discrete screen of pixels.
 				To implement this, I march over each pixel in the bounding box, calculate its barycentric coordinates.
@@ -181,18 +187,12 @@
 				texture space and sampled according to the chosen sampling method.
 			</p>
 
-			<bold-text>Briefly discuss the two different pixel sampling methods, nearest and bilinear. </bold-text> <br><br>
 			<p>
 				In nearest sampling, we select the closest texel (the smallest unit that makes up the texture), and take that color,
 				but this produces sharp and blocky results, which can look bad far away.
 				In bilinear sampling, we do a similar process to supersampling in which we interpolate between 4 surrounding texels,
 				and calculate a weight sum based on the fractional change in the x and y directions which produces a smoother final product.
 			</p>
-
-			<bold-text>Show and compare four png screenshots using nearest sampling at 1 sample per pixel,
-				nearest sampling at 16 samples per pixel, bilinear sampling at 1 sample per pixel,
-				and bilinear sampling at 16 samples per pixel.
-			</bold-text> <br><br>
 
 			<p>
 				I used texmap/test1.svg for all 4 screenshots
@@ -233,42 +233,33 @@
 
 			<h2>Task 6: “Level sampling” with mipmaps for texture mapping</h2>
 
-			<bold-text>What is level sampling? </bold-text> <br><br>
-			<ul>
-				<li>When we are working with mipmaps, level sampling is how we choose which mipmap level to sample from when texturing a surface. A mipmap contains the same texture but at different resolutions and scales.
-					When applying a texture to the scene, pixels that are close to the user require a higher level of detail so we choose a mipmap with a lower level. Lower level mipmaps have higher resolution and higher level mipmaps have lower resolution. For pixels further away, we choose a higher level since it requires lower detail due to many texels per pixel.
-				</li>
-				<li>
-					For our implementation, in <code>RasterizerImp::rasterize_textured_triangle</code>, we find the barycentric u, v vectors for the sample point <code>(x, y)</code>, <code>(x + 1, y)</code>, and <code>(x, y + 1)</code>.
-					The latter two translate into \((\frac{du}{dx}, \frac{dv}{dx})\) and \((\frac{du}{dy}, \frac{dv}{dy})\) respectively. But we needed to find two difference vectors \((\frac{du}{dx})\) - <code>sp.p_uv</code> * <code>width</code> and \((\frac{du}{dy})\) - <code>sp.p_uv</code> * <code>height</code>. We use these as our representations for  \((\frac{du}{dx}, \frac{dv}{dx})\) and \((\frac{du}{dy}, \frac{dv}{dy})\) with respect to our texture dimensions.
-					Next, we use the equation from the lecture slides \(L = max(\sqrt{(\frac{du}{dx})^2 + \frac{dv}{dx})^2}, \sqrt{(\frac{du}{dy})^2 + (\frac{dv}{dy})^2})\), \(D = log_2{L}\) where \(D\) is the mipmap level.
-				</li>
-				<li>
-					For <code>L_LINEAR</code>, we get a continuous (as a float) representation of the mipmap level. Then, we get the upper and lower levels bounding it, sample based on the point sampling method, and finally lerp <code>continuous_level - lower_level</code> between the two sampled colors.
-				</li>
-			</ul>
-
-
-			<bold-text>Discuss the tradeoffs between speed, memory usage, and antialiasing power between pixel sampling, level sampling, and the number of samples per pixel:</bold-text> <br><br>
+			<p>
+				Level sampling determines which quality of a texture (aka mipmap level) should be used when sampling a texture for a pixel. 
+				It solves the problem of a texture when viewed from far away and having the highest quality texture, many pixels corresponding to large regions causing aliasing. 
+				By choosing a lower resolution version of the texture, we can better match how much texture is being compressed, reducing Moiré patterns and other aliasing artifacts. 
+				I implemented this very similarly to the previous tasks. At every pixel in the bounding box, we compute the barycentric coordinates, and if it is within the region that is to be textured, we estimate the uv derivatives in the x and y directions which will help estimate the level of detail, then create a <code>SampleParams</code> struct to store our data, vectors, and  pixel/level sampling methods. 
+				From there we call the <code>sample()</code> method to get the color. During this function call, if the lsm is either L_ZERO (mipmap level 0) or L_NEAREST (nearest mip level rounded down), we do a similar call to the corresponding method for nearest or bilinear pixel sampling. 
+				Otherwise, we perform a linear interpolation. We decide the 2 colors we will be linearly interpolating between based on the pixel sampling method chosen using this equation: \(c_0 * (1 - t) + c_1 * t\), where c_0 and c_1 are the colors at the current level rounded down 
+				and 1 level up respectively, and the float t is the current level minus c_0. This produces a much smoother transition between the mip levels and reduces artifacts.
+			</p>
+			<bold-text>Some of the differences between the three sampling methods:</bold-text> <br><br>
 			<ol>
 				<li><bold-text>Pixel Sampling</bold-text></li>
-				<ul>
-					<li>Speed: Pretty fast as when in NEAREST we are performing 1 lookup and for LINEAR we are performing 4 lookups.</li>
-					<li>Memory Usage: Constant since we are just using the original pixels in the image.</li>
-					<li>Antialiasing Power: Limited as aliased lines will still appear to be blocky and may still contain artifacts.</li>
-				</ul>
+				<p>
+					This method is one of the faster methods, especially in NEAREST mode since it is only 1 lookup. With LINEAR mode it gets a bit slower
+					since we are performing 4 lookups and doing a weighted average, but it is still pretty fast. Both modes do not use extra memory we just use the original pixels to do our sampling.
+					This method is not the best at antialiasing as aliased lines will still appear to be blocky and may still contain artifacts, especially when the texture is minified.
 				<li><bold-text>Level Sampling</bold-text></li>
-				<ul>
-					<li>Speed: Slower than pixel sampling, but still faster than number of samples per pixel due to performing calculations for finding the appropriate mipmap level.</li>
-					<li>Memory Usage: Higher, as we need to store the mipmap texture.</li>
-					<li>Antialiasing Power: Good against texture minification and preventing moiré patterns.</li>
-				</ul>
-				<li><bold-text>Number Of Samples Per Pixel</bold-text></li>
-				<ul>
-					<li>Speed: Very slow as the cost scales linearly with sample number.</li>
-					<li>Memory Usage: Our sample buffer size increases linearly with the sample number.</li>
-					<li>Antialiasing Power: Best all of the three, but very expensive.</li>
-				</ul>
+				<p>
+					Level sampling is a bit slower than pixel sampling since we have to perform calculations to find the appropriate mipmap level, 
+					but it is still faster than number of samples per pixel since we are not performing multiple lookups for each pixel.
+					We have to use more memory to store the mipmap texture, but it is worth it since it can prevent texture minification and moiré patterns.
+				</p>
+				<li><bold-text>Number Of Samples Per Pixel (aka supersampling)</bold-text></li>
+				<p>This method is the slowest due to the time taken to compute each sample increases linearlry with the sample rate. 
+					It also uses more memory than per pixel sampling since we increase the size of our sample buffer linearly with the sample number. 
+					However, it has the best antialiasing power as it can help smooth out jagged edges and other artifacts by averaging neighboring pixels together.</p>
+				</p>
 			</ol>
 
 			<bold-text><i>Image of the a tile shown with differing lsm/psm combinations:</i></bold-text>
