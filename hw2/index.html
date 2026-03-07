@@ -140,8 +140,7 @@
         vertex, looping while we don't end back up at the start. In this loop we get positions p0
         (current position), p1 (one vertex ahead), and p2 (2 vertices ahead) by grabbing the vertex
         positions. Then by calculating vectors Vector3D e1 = p1 - p0 and Vector3D e2 = p2 - p0, we get 2 vectors, which
-        we
-        take the cross product \(e1 \times e2\) and add to L. This cross product is orthogonal to both e1 and e2 and
+        we take the cross product \(e1 \times e2\) and add to L. This cross product is orthogonal to both e1 and e2 and
         proportional to
         the area of the triangle that the 3 vertices enclose, so adding it to L contributes to the area weighted
         contribution
@@ -223,30 +222,25 @@
         I also experienced some bugs when flipping newly split edges, as they would flip underneath other edges, but
         it seems like a quirk of the rendering and not something that may cause any errors.
     </p>
-    <h3>Part 6: Loop subdivision for mesh upsampling</h3>
+    <h3>Part 6: Loop subdivision for mesh upsampling</h3>s.size());
+lPoints) {
     <p>
         The structure of my implementation closely followed the staff suggested flow.
         We first iterate through every vertex to determine its new position, determined by the Loop
         Subdivision Rule. For the linear interpolation that determines a vertex's new location, we determine
         if a vertex is connected to exactly 3 elements, which we set a double u to
 
-        After setting each vector's new positon, we create a <code>std::vector
-        <EdgeIter> orignals
-    </code>
+        After setting each vector's new positon, we create a <code>std::vector<EdgeIter> orignals</code>
         to store all the edges in the mesh before we split. For every edge, we grab its half edge, each of the 4
         vertices (see figure for how I decided to interpret them), and computed the new position of the edge as
         \(3/8 * (A + B) + 1/8 * (C + D) \). We also make sure to indicate that that given edge is not new (ie. not
         created by an edge split) before storing it inside <code>originals</code>. Next, for every edge in <code>originals</code>
         We perform an edge split with <code>splitEdge()</code>, which returns the newly created midpoint. After that we
-        indicate
-        the midpoint is new by <code>midpoint->isNew = true</code> and setting its position/new position to the edge's
-        new
-        position. Next, we need to flip any edge that connects an old and new vertex. iterating through every edge in
-        the mesh again
-        we grab a given edge's half edge and the vertices of both the halfedge and its twin. if the edge is new and
+        indicate the midpoint is new by <code>midpoint->isNew = true</code> and setting its position/new position to the edge's
+        new position. Next, we need to flip any edge that connects an old and new vertex. iterating through every edge in
+        the mesh again we grab a given edge's half edge and the vertices of both the halfedge and its twin. if the edge is new and
         the <code>isNew</code> of both vertices don't match, we call <code>flipEdge(e)</code>. Finally, we finish by
-        setting every
-        vertex's position to its new position.
+        setting every vertex's position to its new position.
     </p>
     <p></p>
     <figure></figure>
