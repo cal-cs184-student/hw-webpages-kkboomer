@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -25,257 +26,323 @@
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
-    <div style="text-align: center;">Name: Kellen Galban</div>
+    <div class="container">
+        <h1>CS184/284A Spring 2025 Homework 2 Write-Up</h1>
+        <div style="text-align: center;">Name: Kellen Galban</div>
 
-    <br>
+        <br>
 
-    Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-kkboomer">https://cal-cs184-student.github.io/hw-webpages-kkboomer</a>
+        Link to webpage: <a
+            href="https://cal-cs184-student.github.io/hw-webpages-kkboomer">https://cal-cs184-student.github.io/hw-webpages-kkboomer</a>
 
-    <br>
+        <br>
 
-    Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw2-meshedit-for_gabe">https://github.com/cal-cs184-student/hw2-meshedit-for_gabe</a>
+        Link to GitHub repository: <a
+            href="https://github.com/cal-cs184-student/hw2-meshedit-for_gabe">https://github.com/cal-cs184-student/hw2-meshedit-for_gabe</a>
 
-    <!--
+        <!--
     We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
     -->
 
-    <h2>Overview</h2>
-    In this HW I implemented a basic pipeline for rendering simple Bezier curves/surfaces, as well as gained
-    experience with meshes and how to manipulate them to achieve better lighting and detail through edge manipulation
-    and upscaling. I had a lot of fun with this homework and to be honest it was nto too hard since a lot
-    of the later parts were simple pointer manipulation. Also, this is the first major project I had to migrate
-    computers for (my windows laptop could not render task 2 so ty CachyOS for saving me :) ).
+        <h2>Overview</h2>
+        In this HW I implemented a basic pipeline for rendering simple Bezier curves/surfaces, as well as gained
+        experience with meshes and how to manipulate them to achieve better lighting and detail through edge
+        manipulation
+        and upscaling. I had a lot of fun with this homework and to be honest it was nto too hard since a lot
+        of the later parts were simple pointer manipulation. Also, this is the first major project I had to migrate
+        computers for (my windows laptop could not render task 2 so ty CachyOS for saving me :) ).
 
-    <h2>Section I: Bezier Curves and Surfaces</h2>
+        <h2>Section I: Bezier Curves and Surfaces</h2>
 
-    <h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-    <p>
-        The de Casteljau algorithm evaluates a Bezier curve by repeatedly performing linear interpolation between a set
-        of control points.
-        At each step, interpolation is performed between neighboring points, producing a new set of
-        points that is one element smaller than the previous set.
-        process continues until only a single point remains, which represents the evaluated point on the Bezier
-        curve for a given parameter t.
-    </p>
-    <p>
-        To implement, we create a <code>std::vector
+        <h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
+        <p>
+            The de Casteljau algorithm evaluates a Bezier curve by repeatedly performing linear interpolation between a
+            set
+            of control points.
+            At each step, interpolation is performed between neighboring points, producing a new set of
+            points that is one element smaller than the previous set.
+            process continues until only a single point remains, which represents the evaluated point on the Bezier
+            curve for a given parameter t.
+        </p>
+        <p>
+            To implement, we create a <code>std::vector
         <Vector2D> nextPoints </code> which we will return. We then iterate
-        through the given points and perform a linear interpolation between 2 neighboring points, which gives us a point
-        that lies between them, which we insert into <code>nextPoints</code>. The vector we return is exactly one point
-        less than was passed in, which means that when this function is repeatedly called, we can eventually get a
-        single
-        control point that can determine the path of the given curve. Note that the function written for this task only
-        performs
-        1 step of the algorithm, so hitting the E key calls this function until 1 point is left.
-    </p>
-    <p>Here is the custom curve I created with 6 points and all levels</p>
-    <div style="display: flex; flex-direction: column; align-items: center;">
-        <table style="width: 100%; text-align: center; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: center;">
-                    <img src="write_up/task1_lev0.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 0</figcaption>
-                </td>
-                <td style="text-align: center;">
-                    <img src="write_up/task1_lev1.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 1</figcaption>
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align: center;">
-                    <img src="images/task1_lev2.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 2</figcaption>
-                </td>
-                <td style="text-align: center;">
-                    <img src="images/task1_lev3.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 3</figcaption>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div style="display: flex; flex-direction: column; align-items: center;">
-        <table style="width: 100%; text-align: center; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: center;">
-                    <img src="write_up/task1_lev4.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 4</figcaption>
-                </td>
-                <td style="text-align: center;">
-                    <img src="write_up/task1_lev5.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 5</figcaption>
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align: center;">
-                    <img src="images/task1_finallev.png" width="400px"/>
-                    <figcaption>task1_curve.bzc at level 6</figcaption>
-                </td>
-                <td style="text-align: center;">
-                    <img src="images/task1_modshift.png" width="400px"/>
-                    <figcaption>Modified curve at final level (note for some reason moving control points did not work, a new file was created instead)</figcaption>
-                </td>
-            </tr>
-        </table>
-    </div>
+            through the given points and perform a linear interpolation between 2 neighboring points, which gives us a
+            point
+            that lies between them, which we insert into <code>nextPoints</code>. The vector we return is exactly one
+            point
+            less than was passed in, which means that when this function is repeatedly called, we can eventually get a
+            single
+            control point that can determine the path of the given curve. Note that the function written for this task
+            only
+            performs
+            1 step of the algorithm, so hitting the E key calls this function until 1 point is left.
+        </p>
+        <p>Here is the custom curve I created with 6 points and all levels</p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev0.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 0</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev1.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 1</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev2.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 2</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev3.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 3</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev4.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 4</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev5.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 5</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_finallev.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 6</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_modshift.png" width="400px" />
+                        <figcaption>Modified curve at final level (note for some reason moving control points did not
+                            work, a new file was created instead)</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-    <h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-    <p>
-        de Casteljau’s algorithm can be extended to Bezier surfaces by performing the interpolation process in two
-        parametric directions. A Bezier surface is defined by a grid of control points, and is parametrized by
-        parameters \(u\) and \(v\).
-        We first create a <code>std::vector
+        <h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
+        <p>
+            de Casteljau’s algorithm can be extended to Bezier surfaces by performing the interpolation process in two
+            parametric directions. A Bezier surface is defined by a grid of control points, and is parametrized by
+            parameters \(u\) and \(v\).
+            We first create a <code>std::vector
         <Vector3D> rowPoints
     </code> to store the result of our first round of de Casteljau,
-        then for every control point in the mesh we call our <code> Vector3D BezierPatch::evaluate1D(std::vector
+            then for every control point in the mesh we call our <code> Vector3D BezierPatch::evaluate1D(std::vector
         <Vector3D> const &points, double t) const
     </code>
-        with respect to u. In this function, we reserve <code>std::vector
+            with respect to u. In this function, we reserve <code>std::vector
         <Vector3D> nextPoints
     </code> that starts 1
-        element smaller than the input vector. We then continually call <code>evaluateStep(newPoints, t)</code>, which
-        performs linear interpolation between neighboring points until <code>newPoints.size == 1</code>. This produces
-        a set of intermediate points of each row at parameter u, which essentially squishes down the surface into 1
-        bezier curve.
-        To finish we just call <code>Vector3D BezierPatch::evaluate1D(...)</code> one last time with respect to v,
-        returning the final evaluated point on the Bezier surface.
-    </p>
-    <figure>
-        <img src="write_up/task2.png" style="width:70%"/>
-        <figcaption>teapot.bez rendered via de Casteljau</figcaption>
-    </figure>
-    <h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
+            element smaller than the input vector. We then continually call <code>evaluateStep(newPoints, t)</code>,
+            which
+            performs linear interpolation between neighboring points until <code>newPoints.size == 1</code>. This
+            produces
+            a set of intermediate points of each row at parameter u, which essentially squishes down the surface into 1
+            bezier curve.
+            To finish we just call <code>Vector3D BezierPatch::evaluate1D(...)</code> one last time with respect to v,
+            returning the final evaluated point on the Bezier surface.
+        </p>
+        <figure>
+            <img src="write_up/task2.png" style="width:70%" />
+            <figcaption>teapot.bez rendered via de Casteljau</figcaption>
+        </figure>
+        <h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
-    <h3>Part 3: Area-weighted vertex normals</h3>
-    <p>
-        We first initialized a vector L representing the accumulated normal at the vertex.
-        We then initialize a <code>HalfEdgeIter h</code> and start to move through all the halfedges associated with
-        this
-        vertex, looping while we don't end back up at the start. In this loop we get positions p0
-        (current position), p1 (one vertex ahead), and p2 (2 vertices ahead) by grabbing the vertex
-        positions. Then by calculating vectors Vector3D e1 = p1 - p0 and Vector3D e2 = p2 - p0, we get 2 vectors, which
-        we take the cross product \(e1 \times e2\) and add to L. This cross product is orthogonal to both e1 and e2 and
-        proportional to
-        the area of the triangle that the 3 vertices enclose, so adding it to L contributes to the area weighted
-        contribution
-        of each neighboring face. After the loop is finished, we normalize L and can return an area weighted normal at a
-        given vertex.
-    </p>
-    <figure>
-        <img src="write_up/task3_flat.png" style="width:70%"/>
-        <figcaption>Flat Shading</figcaption>
-    </figure>
-    <figure>
-        <img src="write_up/task3_bp.png" style="width:70%"/>
-        <figcaption>Blinn Phong Shading</figcaption>
-    </figure>
-    <h3>Part 4: Edge flip</h3>
-    <p>
-        I began by labeling all vertices, edges, halfedges, and faces around the edge being flipped.
-        I assume the edge to be flipped lies between vertices B and C, and label the surrounding
-        vertices A and D accordingly. This labeling makes it easier to track how connectivity
-        changes after the flip.
+        <h3>Part 3: Area-weighted vertex normals</h3>
+        <p>
+            We first initialized a vector L representing the accumulated normal at the vertex.
+            We then initialize a <code>HalfEdgeIter h</code> and start to move through all the halfedges associated with
+            this
+            vertex, looping while we don't end back up at the start. In this loop we get positions p0
+            (current position), p1 (one vertex ahead), and p2 (2 vertices ahead) by grabbing the vertex
+            positions. Then by calculating vectors Vector3D e1 = p1 - p0 and Vector3D e2 = p2 - p0, we get 2 vectors,
+            which
+            we take the cross product \(e1 \times e2\) and add to L. This cross product is orthogonal to both e1 and e2
+            and
+            proportional to
+            the area of the triangle that the 3 vertices enclose, so adding it to L contributes to the area weighted
+            contribution
+            of each neighboring face. After the loop is finished, we normalize L and can return an area weighted normal
+            at a
+            given vertex.
+        </p>
+        <figure>
+            <img src="write_up/task3_flat.png" style="width:70%" />
+            <figcaption>Flat Shading</figcaption>
+        </figure>
+        <figure>
+            <img src="write_up/task3_bp.png" style="width:70%" />
+            <figcaption>Blinn Phong Shading</figcaption>
+        </figure>
+        <h3>Part 4: Edge flip</h3>
+        <p>
+            I began by labeling all vertices, edges, halfedges, and faces around the edge being flipped.
+            I assume the edge to be flipped lies between vertices B and C, and label the surrounding
+            vertices A and D accordingly. This labeling makes it easier to track how connectivity
+            changes after the flip.
 
-        Before performing the flip, I check whether either face adjacent to the edge is a boundary
-        face. If the edge lies on the boundary, the flip is aborted because flipping would require
-        two valid neighboring triangles, which do not exist at the boundary.
+            Before performing the flip, I check whether either face adjacent to the edge is a boundary
+            face. If the edge lies on the boundary, the flip is aborted because flipping would require
+            two valid neighboring triangles, which do not exist at the boundary.
 
-        To perform the flip, I update the vertices that the halfedges <code>bc_h</code> and
-        <code>cb_h</code> (<code>bc_h->twin()</code>) point to, changing them from B and C to A and D
-        respectively. Conceptually, this replaces the diagonal BC with the new diagonal AD,
-        so I relabel these halfedges as <code>ad_h</code> and <code>da_h</code> for clarity.
+            To perform the flip, I update the vertices that the halfedges <code>bc_h</code> and
+            <code>cb_h</code> (<code>bc_h->twin()</code>) point to, changing them from B and C to A and D
+            respectively. Conceptually, this replaces the diagonal BC with the new diagonal AD,
+            so I relabel these halfedges as <code>ad_h</code> and <code>da_h</code> for clarity.
 
-        Next, I call <code>HalfedgeMesh::setNeighbors</code> on each halfedge to update their
-        <code>next</code>, <code>twin</code>, <code>edge</code>, <code>face</code>, and
-        <code>vertex</code> pointers so that the mesh connectivity reflects the flipped edge.
+            Next, I call <code>HalfedgeMesh::setNeighbors</code> on each halfedge to update their
+            <code>next</code>, <code>twin</code>, <code>edge</code>, <code>face</code>, and
+            <code>vertex</code> pointers so that the mesh connectivity reflects the flipped edge.
 
-        Finally, I update the primary halfedge for each face, reassign the halfedge associated
-        with the flipped edge <code>e0</code>, and ensure each vertex points to a valid outgoing
-        halfedge. After all connectivity is updated, the edge flip operation is complete and the
-        edge iterator is returned.
-    </p>
-     <div style="display: flex; flex-direction: column; align-items: center;">
-        <table style="width: 100%; text-align: center; border-collapse: collapse;">
-            <tr>
-                <td style="text-align: center;">
-                    <img src="write_up/task4_before.png" width="400px"/>
-                    <figcaption>Before</figcaption>
-                </td>
-                <td style="text-align: center;">
-                    <img src="write_up/task4_after.png" width="400px"/>
-                    <figcaption>After</figcaption>
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align: center;">
-                    <img src="images/task4_diagrams.png" width="400px"/>
-                    <figcaption>Some drawn diagrams</figcaption>
-                </td>
-            </tr>
-        </table>
+            Finally, I update the primary halfedge for each face, reassign the halfedge associated
+            with the flipped edge <code>e0</code>, and ensure each vertex points to a valid outgoing
+            halfedge. After all connectivity is updated, the edge flip operation is complete and the
+            edge iterator is returned.
+        </p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task4_before.png" width="400px" />
+                        <figcaption>Before</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task4_after.png" width="400px" />
+                        <figcaption>After</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task4_diagram" width="400px" />
+                        <figcaption>Some drawn diagrams</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h3>Part 5: Edge split</h3>
+        <p>
+            Similar to task 4, I start by labeling every vertex, halfedge, and face that is associated with the passed
+            in
+            edge. We then check if the edge is a boundary, of which there are 2 cases.
+        </p>
+        <ul>
+            <li>
+                Case 1: it is a boundary (EC):
+            </li>
+            <li>
+                Case 2: It is not a boundary: This is the most common case; we create the midpoint m as a new
+                <code>VertexIter</code>, and compute its position as
+                \( m.position = 0.5 * (b.position + c.position) \).
+                I then initialize the new edges, halfedges, and faces that are created from the split, labeling them
+                in a similar fashion to how I did the existing elements (f# for faces, (start vertex)(end vertex)_h
+                for halfedges, and (start)(end) for edges). After deciding where to assign the faces (see figure for how
+                I
+                decided to lay out the split), we go face by face and call <code>halfEdgeMesh::setNeighbors(...)</code>
+                on each half edge that will border that face and set its respective elements. We then finish by setting
+                each of the faces', new edges', and vertices' respective half edge before returning the midpoint.
+            </li>
+        </ul>
+        <figure>
+            <img src="write_up/task5_flat.png" style="width:70%" />
+            <figcaption>Flat Shading</figcaption>
+        </figure>
+        <figure>
+            <img src="write_up/task5_bp.png" style="width:70%" />
+            <figcaption>Blinn Phong Shading</figcaption>
+        </figure>
+
+        <p>
+            In terms of debugging, Similar to Task 4, I did not know of
+            <code>halfEdgeMesh::setNeighbors(...)</code>, so the function was a gargantuan 125 lines long since
+            I did manual pointer management, but after implementing the function, it is now under 80 lines (back to over
+            100
+            since I decided to go for the EC).
+            I also experienced some bugs when flipping newly split edges, as they would flip underneath other edges, but
+            it seems like a quirk of the rendering and not something that may cause any errors.
+        </p>
+        <h3>Part 6: Loop subdivision for mesh upsampling</h3>
+        <p>
+            The structure of my implementation closely followed the staff suggested flow.
+            First, I iterate through every vertex in the mesh and compute its new position
+            according to the Loop subdivision rule. For each vertex, I determine its degree
+            (number of neighboring vertices). If the degree is 3, I use
+            <code>u = 3/16</code>, otherwise I use <code>u = 3/(8n)</code> where <code>n</code>
+            is the vertex degree. The new vertex position is computed as a weighted
+            combination of the original vertex position and the positions of its neighboring
+            vertices. These values are stored in <code>Vertex::newPosition</code>, and each
+            original vertex is marked with <code>isNew = false</code>.
+            </p>
+
+            <p>
+                Next, I compute the new positions associated with each edge. I create a
+                <code>std::vector<EdgeIter> originals</code> to store all edges in the mesh
+                before subdivision so that newly created edges are not processed again later.
+                For each edge, I obtain its halfedge and identify the four vertices involved
+                (two vertices on the edge and two opposing vertices from the adjacent faces).
+                Using these vertices, I compute the edge midpoint position using the Loop rule
+            </p>
+
+            <p>
+                \( \frac{3}{8}(A + B) + \frac{1}{8}(C + D) \)
+            </p>
+
+            <p>
+                where A and B are the endpoints of the edge and C and D are the opposing
+                vertices from the two neighboring triangles. This value is stored in
+                <code>Edge::newPosition</code>, and the edge is marked as an original edge
+                (<code>isNew = false</code>) before being added to the <code>originals</code>
+                vector.
+            </p>
+
+            <p>
+                After computing all vertex and edge positions, I split every edge in the
+                <code>originals</code> vector using <code>splitEdge()</code>. This operation
+                returns the newly created midpoint vertex. I mark this vertex as new by setting
+                <code>midpoint->isNew = true</code> and assign both its
+                <code>position</code> and <code>newPosition</code> to the value stored in the
+                edge's <code>newPosition</code>.
+            </p>
+
+            <p>
+                Next, I flip any edge that connects an old vertex and a new vertex. I iterate
+                through all edges in the mesh, obtain the vertices of each halfedge and its
+                twin, and check whether exactly one of them is new. If the edge itself is marked
+                as new and its vertices have different <code>isNew</code> values, I call
+                <code>flipEdge(e)</code> to enforce the correct connectivity required by Loop
+                subdivision.
+            </p>
+
+            <p>
+                Finally, after all topological changes are complete, I update the mesh geometry
+                by setting each vertex's <code>position</code> to the value stored in
+                <code>newPosition</code>.
+            </p>
+
+            <p>
+                When repeatedly applying Loop subdivision to <code>cube.dae</code>, the cube
+                gradually becomes slightly asymmetric. This happens because the triangulation
+                of each face introduces diagonals that are not arranged symmetrically across
+                the cube. As subdivision proceeds, these small asymmetries are amplified by the
+                vertex averaging process, causing the cube to deform unevenly. To reduce this
+                effect, the cube can be preprocessed by performing edge flips so that the
+                diagonals on each face are arranged symmetrically before subdivision. This
+                ensures that the subdivision process treats each face consistently and helps
+                preserve the cube’s symmetry over multiple iterations.
+            </p>
+            <figure></figure>
     </div>
-    <h3>Part 5: Edge split</h3>
-    <p>
-        Similar to task 4, I start by labeling every vertex, halfedge, and face that is associated with the passed in
-        edge. We then check if the edge is a boundary, of which there are 2 cases.
-    </p>
-    <ul>
-        <li>
-            Case 1: it is a boundary (EC):
-        </li>
-        <li>
-            Case 2: It is not a boundary: This is the most common case; we create the midpoint m as a new
-            <code>VertexIter</code>, and compute its position as
-            \( m.position = 0.5 * (b.position + c.position) \).
-            I then initialize the new edges, halfedges, and faces that are created from the split, labeling them
-            in a similar fashion to how I did the existing elements (f# for faces, (start vertex)(end vertex)_h
-            for halfedges, and (start)(end) for edges). After deciding where to assign the faces (see figure for how I
-            decided to lay out the split), we go face by face and call <code>halfEdgeMesh::setNeighbors(...)</code>
-            on each half edge that will border that face adn set its respective elements. We then finish by setting
-            each of the faces', new edges', and vertices' respective half edge before returning the midpoint.
-        </li>
-    </ul>
-    <figure>
-        <img src="write_up/task5_flat.png" style="width:70%"/>
-        <figcaption>Flat Shading</figcaption>
-    </figure>
-    <figure>
-        <img src="write_up/task5_bp.png" style="width:70%"/>
-        <figcaption>Blinn Phong Shading</figcaption>
-    </figure>
-
-    <p>
-        In terms of debugging, Similar to Task 4, I did not know of
-        <code>halfEdgeMesh::setNeighbors(...)</code>, so the function was a gargantuan 125 lines long since
-        I did manual pointer management, but after implementing the function, it is now under 80 lines (back to over 100
-        since I decided to go for the EC) .
-        I also experienced some bugs when flipping newly split edges, as they would flip underneath other edges, but
-        it seems like a quirk of the rendering and not something that may cause any errors.
-    </p>
-    <h3>Part 6: Loop subdivision for mesh upsampling</h3>s.size());
-lPoints) {
-    <p>
-        The structure of my implementation closely followed the staff suggested flow.
-        We first iterate through every vertex to determine its new position, determined by the Loop
-        Subdivision Rule. For the linear interpolation that determines a vertex's new location, we determine
-        if a vertex is connected to exactly 3 elements, which we set a double u to
-
-        After setting each vector's new positon, we create a <code>std::vector<EdgeIter> orignals</code>
-        to store all the edges in the mesh before we split. For every edge, we grab its half edge, each of the 4
-        vertices (see figure for how I decided to interpret them), and computed the new position of the edge as
-        \(3/8 * (A + B) + 1/8 * (C + D) \). We also make sure to indicate that that given edge is not new (ie. not
-        created by an edge split) before storing it inside <code>originals</code>. Next, for every edge in <code>originals</code>
-        We perform an edge split with <code>splitEdge()</code>, which returns the newly created midpoint. After that we
-        indicate the midpoint is new by <code>midpoint->isNew = true</code> and setting its position/new position to the edge's
-        new position. Next, we need to flip any edge that connects an old and new vertex. iterating through every edge in
-        the mesh again we grab a given edge's half edge and the vertices of both the halfedge and its twin. if the edge is new and
-        the <code>isNew</code> of both vertices don't match, we call <code>flipEdge(e)</code>. Finally, we finish by
-        setting every vertex's position to its new position.
-    </p>
-    <p></p>
-    <figure></figure>
-</div>
 </body>
+
 </html>
