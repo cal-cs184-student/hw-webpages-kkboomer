@@ -50,7 +50,7 @@
         In this HW I implemented a basic pipeline for rendering simple Bezier curves/surfaces, as well as gained
         experience with meshes and how to manipulate them to achieve better lighting and detail through edge
         manipulation
-        and upscaling. I had a lot of fun with this homework and to be honest it was nto too hard since a lot
+        and upscaling. I had a lot of fun with this homework and to be honest it was not too hard since a lot
         of the later parts were simple pointer manipulation. Also, this is the first major project I had to migrate
         computers for (my windows laptop could not render task 2 so ty CachyOS for saving me :) ).
 
@@ -63,12 +63,12 @@
             of control points.
             At each step, interpolation is performed between neighboring points, producing a new set of
             points that is one element smaller than the previous set.
-            process continues until only a single point remains, which represents the evaluated point on the Bezier
+            The process continues until only a single point remains, which represents the evaluated point on the Bezier
             curve for a given parameter t.
         </p>
         <p>
             To implement, we create a <code>std::vector
-        <Vector2D> nextPoints </code> which we will return. We then iterate
+        &lt;Vector2D&gt; nextPoints</code> which we will return. We then iterate
             through the given points and perform a linear interpolation between 2 neighboring points, which gives us a
             point
             that lies between them, which we insert into <code>nextPoints</code>. The vector we return is exactly one
@@ -137,13 +137,13 @@
             parametric directions. A Bezier surface is defined by a grid of control points, and is parametrized by
             parameters \(u\) and \(v\).
             We first create a <code>std::vector
-        <Vector3D> rowPoints
+        &lt;Vector3D&gt; rowPoints
     </code> to store the result of our first round of de Casteljau,
             then for every control point in the mesh we call our <code> Vector3D BezierPatch::evaluate1D(std::vector
-        <Vector3D> const &points, double t) const
+        &lt;Vector3D&gt; const &points, double t) const
     </code>
             with respect to u. In this function, we reserve <code>std::vector
-        <Vector3D> nextPoints
+        &lt;Vector3D&gt; nextPoints
     </code> that starts 1
             element smaller than the input vector. We then continually call <code>evaluateStep(newPoints, t)</code>,
             which
@@ -239,9 +239,18 @@
         </p>
         <ul>
             <li>
-                Case 1: it is a boundary (EC): In this case, we only have 1 face that the half edge is associated with. To perform the split, we first determine 
-                which of the half edges (either the original or the twin) is the one on the boundary (ie. outside), and label accordingly. We then create the new elements
-                as we do in the regular case, so one midpoint, 
+                Case 1: it is a boundary (EC): In this case, the edge only borders a single real
+                face, and instead of splitting 2 faces into 4, we split 1 into 2. To perform the split, I first determine which of the halfedges (the original or its twin) is the
+                one on the boundary (i.e., the "outside" loop) and label them <code>h_in</code> and <code>h_out</code>
+                accordingly. We then create the new elements:
+                one midpoint <code>m</code> whose position is $m.position = 0.5 *
+                (b.position + c.position)$, two new edges (<code>am</code> for the interior cross edge, and
+                <code>mc</code> for the second half of the boundary), one new face $f2$, and four new halfedges <code>am_h, ma_h, mc_h, mb_h</code>.
+                We can reuse <code>h_out</code> for the new m->c boundary segment to keep existing memory references and avoid 
+                the preceding halfedge having to traverse a massive loop to find this halfedge. I then simply linked its
+                <code>next()</code> pointer to the newly created $m \to b$ boundary halfedge <code>mb_h</code>. 
+                Next, we call <code>setNeigbors()</code>on all elements to set their instance variables, set the vertices'/faces'/edges'
+                respective anchor halfedges, and set the <code>isNew</code> flags of <code>bm->isNew = false; mc->isNew = false; am->isNew = true;</code> to ensure no topology shredding in Task 6.
             </li>
             <li>
                 Case 2: It is not a boundary: This is the most common case; we create the midpoint m as a new
@@ -254,6 +263,13 @@
                 decided to lay out the split), we go face by face and call <code>halfEdgeMesh::setNeighbors(...)</code>
                 on each half edge that will border that face and set its respective elements. We then finish by setting
                 each of the faces', new edges', and vertices' respective half edge before returning the midpoint.
+                Additionally, I had to
+                indicate that <code>bm->isNew = false; mc->isNew = false;</code> since they are not new edges created
+                during the split
+                and <code>am->isNew = true; dm->isNew = true; </code> since they were newly created from the split. This
+                is done for Task 6
+                compatibility since we iterate through every edge in the mesh after we split all original edges and need
+                to know when to flip new edges.
             </li>
         </ul>
         <div style="display: flex; flex-direction: column; align-items: center;">
@@ -277,6 +293,10 @@
                         <img src="write_up/task5_diagram.jpg" width="400px" />
                         <figcaption>Diagram used for visualizing and debugging</figcaption>
                     </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_diagram2.jpg" width="400px" />
+                        <figcaption>Diagram used for boundary edges</figcaption>
+                    </td>
                 </tr>
                 <tr>
                     <td style="text-align: center;">
@@ -284,14 +304,14 @@
                         <figcaption>custom plane.dae file before boundary edge splits</figcaption>
                     </td>
                     <td style="text-align: center;">
-                        <img src="write_up/task5_esAfter.png" width="400px" />
+                        <img src="write_up/task5EC_after.png" width="400px" />
                         <figcaption>plane.dae after 2 outer edges split</figcaption>
                     </td>
                 </tr>
             </table>
         </div>
         <p>
-            In terms of debugging, Similar to Task 4, I did not know of
+            Debugging: Similar to Task 4, I did not know of
             <code>halfEdgeMesh::setNeighbors(...)</code>, so the function was a gargantuan 125 lines long since
             I did manual pointer management, but after implementing the function, it is now under 80 lines (back to over
             100
@@ -314,7 +334,7 @@
 
         <p>
             Next, I compute the new positions associated with each edge. I create a
-            <code>std::vector<EdgeIter> originals</code> to store all edges in the mesh
+            <code>std::vector&lt;EdgeIter&gt; originals</code> to store all edges in the mesh
             before subdivision so that newly created edges are not processed again later.
             For each edge, I obtain its halfedge and identify the four vertices involved
             (two vertices on the edge and two opposing vertices from the adjacent faces).
@@ -356,15 +376,20 @@
             by setting each vertex's <code>position</code> to the value stored in
             <code>newPosition</code>.
         </p>
-
+        <p>
+            We can see that loop subdivision behaves like a low pass filter, smoothing out jagged
+            edges/corners and slightly shrinking the volume of the mesh. We can pre split edges near
+            a sharp corner to reduce the weighting influence of further away vertices, which will help 
+            the mesh retain its shape better (see cube.dae screenshots)
+        </p>
         <p>
             When repeatedly applying Loop subdivision to <code>cube.dae</code>, the cube
             gradually becomes slightly asymmetric. This happens because the triangulation
             of each face introduces diagonals that are not arranged symmetrically across
             the cube. As subdivision proceeds, these small asymmetries are amplified by the
             vertex averaging process, causing the cube to deform unevenly. To reduce this
-            effect, the cube can be preprocessed by performing edge flips so that the
-            diagonals on each face are arranged symmetrically before subdivision. This
+            effect, the cube can be preprocessed by performing edge splits on the diagonal 
+            edges on each face to create a symmetric 'X' pattern before subdivision. This
             ensures that the subdivision process treats each face consistently and helps
             preserve the cube’s symmetry over multiple iterations.
         </p>
@@ -372,26 +397,33 @@
             <table style="width: 100%; text-align: center; border-collapse: collapse;">
                 <tr>
                     <td style="text-align: center;">
-                        <img src="write_up/task6.png" width="400px" />
-                        <figcaption>task1_curve.bzc at level 0</figcaption>
+                        <img src="write_up/task6_nosplit.png" width="400px" />
+                        <figcaption>icosahedron/edgeSplit.dae with no splits</figcaption>
                     </td>
                     <td style="text-align: center;">
-                        <img src="write_up/task1_lev1.png" width="400px" />
-                        <figcaption>task1_curve.bzc at level 1</figcaption>
+                        <img src="write_up/task6_smooth.png" width="400px" />
+                        <figcaption>icosahedron/edgeSplit.dae with splits around one vertex</figcaption>
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align: center;">
-                        <img src="write_up/task1_lev2.png" width="400px" />
-                        <figcaption>task1_curve.bzc at level 2</figcaption>
+                        <img src="write_up/task6_asym.png" width="400px" />
+                        <figcaption>cube.dae after 4 subdivisions and no pre-processing</figcaption>
                     </td>
                     <td style="text-align: center;">
-                        <img src="write_up/task1_lev3.png" width="400px" />
-                        <figcaption>task1_curve.bzc at level 3</figcaption>
+                        <img src="write_up/task6_sym.png" width="400px" />
+                        <figcaption>cube.dae after 4 subdivisions and splitting all faces once</figcaption>
                     </td>
                 </tr>
             </table>
         </div>
+        <p>
+            Debugging: After first pass I encountered a massive bug where the mesh would explode into a spiky mess (see below).
+            This was due to the new edge flipping logic, where I was accidentally flipping split segments of the original edge 
+            rather than only the new cross-edges. The fix was explicitly setting <code>isNew</code> of certain elements to be true or false inside
+            <code>splitEdge()</code>. Additionally I accidentally mislabeled A and D in the vertex <code>newPostion</code> calcuation, which was fixed by calling <code>next()</code>
+            one more time before calling for the vertex and position.
+        </p>
     </div>
 </body>
 
