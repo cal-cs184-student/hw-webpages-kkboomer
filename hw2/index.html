@@ -231,6 +231,16 @@
                 </tr>
             </table>
         </div>
+        <p>
+            Debugging: Originally I did not know that the function <code>halfEdgeMesh::setNeighbors(...)</code> existed, 
+            so I did manual pointer reassignment for EVERY ELEMENT, causing the function to be over double its current length, 
+            and made it very confusing to navigate through. Additionally, this caused problems when double flipping, as on the first flip 
+            the edge would disappear and be on one of the boundaries, and flipping that one again would cause a hole to appear in the mesh. The cause of this 
+            was not setting each vertex’s halfedge, which meant that on subsequent flips the pointers would get mixed up and point to other areas 
+            they were not supposed to. By explicitly setting the vertex halfedges at the very end caused thai problem to disappear and double 
+            flipping functions normally.
+
+        </p>
         <h3>Part 5: Edge split</h3>
         <p>
             Similar to task 4, I start by labeling every vertex, halfedge, and face that is associated with the passed
