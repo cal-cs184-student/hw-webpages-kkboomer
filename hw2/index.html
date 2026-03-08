@@ -239,7 +239,9 @@
         </p>
         <ul>
             <li>
-                Case 1: it is a boundary (EC):
+                Case 1: it is a boundary (EC): In this case, we only have 1 face that the half edge is associated with. To perform the split, we first determine 
+                which of the half edges (either the original or the twin) is the one on the boundary (ie. outside), and label accordingly. We then create the new elements
+                as we do in the regular case, so one midpoint, 
             </li>
             <li>
                 Case 2: It is not a boundary: This is the most common case; we create the midpoint m as a new
@@ -254,18 +256,40 @@
                 each of the faces', new edges', and vertices' respective half edge before returning the midpoint.
             </li>
         </ul>
-        <p>
-            
-        </p>
-        <figure>
-            <img src="write_up/task5_flat.png" style="width:70%" />
-            <figcaption>Flat Shading</figcaption>
-        </figure>
-        <figure>
-            <img src="write_up/task5_bp.png" style="width:70%" />
-            <figcaption>Blinn Phong Shading</figcaption>
-        </figure>
-
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_sBefore.png" width="400px" />
+                        <figcaption>teapot.dae before only edge splits</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_sAfter.png" width="400px" />
+                        <figcaption>teapot.dae after only edge splits</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_esAfter.png" width="400px" />
+                        <figcaption>teapot.dae after edge flips/splits</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_diagram.jpg" width="400px" />
+                        <figcaption>Diagram used for visualizing and debugging</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5EC_before.png" width="400px" />
+                        <figcaption>custom plane.dae file before boundary edge splits</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task5_esAfter.png" width="400px" />
+                        <figcaption>plane.dae after 2 outer edges split</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
         <p>
             In terms of debugging, Similar to Task 4, I did not know of
             <code>halfEdgeMesh::setNeighbors(...)</code>, so the function was a gargantuan 125 lines long since
