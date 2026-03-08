@@ -225,7 +225,7 @@
                 </tr>
                 <tr>
                     <td style="text-align: center;">
-                        <img src="write_up/task4_diagram" width="400px" />
+                        <img src="write_up/task4_diagram.jpg" width="400px" />
                         <figcaption>Some drawn diagrams</figcaption>
                     </td>
                 </tr>
@@ -254,6 +254,9 @@
                 each of the faces', new edges', and vertices' respective half edge before returning the midpoint.
             </li>
         </ul>
+        <p>
+            
+        </p>
         <figure>
             <img src="write_up/task5_flat.png" style="width:70%" />
             <figcaption>Flat Shading</figcaption>
@@ -283,65 +286,88 @@
             combination of the original vertex position and the positions of its neighboring
             vertices. These values are stored in <code>Vertex::newPosition</code>, and each
             original vertex is marked with <code>isNew = false</code>.
-            </p>
+        </p>
 
-            <p>
-                Next, I compute the new positions associated with each edge. I create a
-                <code>std::vector<EdgeIter> originals</code> to store all edges in the mesh
-                before subdivision so that newly created edges are not processed again later.
-                For each edge, I obtain its halfedge and identify the four vertices involved
-                (two vertices on the edge and two opposing vertices from the adjacent faces).
-                Using these vertices, I compute the edge midpoint position using the Loop rule
-            </p>
+        <p>
+            Next, I compute the new positions associated with each edge. I create a
+            <code>std::vector<EdgeIter> originals</code> to store all edges in the mesh
+            before subdivision so that newly created edges are not processed again later.
+            For each edge, I obtain its halfedge and identify the four vertices involved
+            (two vertices on the edge and two opposing vertices from the adjacent faces).
+            Using these vertices, I compute the edge midpoint position using the Loop rule
+        </p>
 
-            <p>
-                \( \frac{3}{8}(A + B) + \frac{1}{8}(C + D) \)
-            </p>
+        <p>
+            \( \frac{3}{8}(A + B) + \frac{1}{8}(C + D) \)
+        </p>
 
-            <p>
-                where A and B are the endpoints of the edge and C and D are the opposing
-                vertices from the two neighboring triangles. This value is stored in
-                <code>Edge::newPosition</code>, and the edge is marked as an original edge
-                (<code>isNew = false</code>) before being added to the <code>originals</code>
-                vector.
-            </p>
+        <p>
+            where A and B are the endpoints of the edge and C and D are the opposing
+            vertices from the two neighboring triangles. This value is stored in
+            <code>Edge::newPosition</code>, and the edge is marked as an original edge
+            (<code>isNew = false</code>) before being added to the <code>originals</code>
+            vector.
+        </p>
 
-            <p>
-                After computing all vertex and edge positions, I split every edge in the
-                <code>originals</code> vector using <code>splitEdge()</code>. This operation
-                returns the newly created midpoint vertex. I mark this vertex as new by setting
-                <code>midpoint->isNew = true</code> and assign both its
-                <code>position</code> and <code>newPosition</code> to the value stored in the
-                edge's <code>newPosition</code>.
-            </p>
+        <p>
+            After computing all vertex and edge positions, I split every edge in the
+            <code>originals</code> vector using <code>splitEdge()</code>. This operation
+            returns the newly created midpoint vertex. I mark this vertex as new by setting
+            <code>midpoint->isNew = true</code> and assign both its
+            <code>position</code> and <code>newPosition</code> to the value stored in the
+            edge's <code>newPosition</code>.
+        </p>
 
-            <p>
-                Next, I flip any edge that connects an old vertex and a new vertex. I iterate
-                through all edges in the mesh, obtain the vertices of each halfedge and its
-                twin, and check whether exactly one of them is new. If the edge itself is marked
-                as new and its vertices have different <code>isNew</code> values, I call
-                <code>flipEdge(e)</code> to enforce the correct connectivity required by Loop
-                subdivision.
-            </p>
+        <p>
+            Next, I flip any edge that connects an old vertex and a new vertex. I iterate
+            through all edges in the mesh, obtain the vertices of each halfedge and its
+            twin, and check whether exactly one of them is new. If the edge itself is marked
+            as new and its vertices have different <code>isNew</code> values, I call
+            <code>flipEdge(e)</code> to enforce the correct connectivity required by Loop
+            subdivision.
+        </p>
 
-            <p>
-                Finally, after all topological changes are complete, I update the mesh geometry
-                by setting each vertex's <code>position</code> to the value stored in
-                <code>newPosition</code>.
-            </p>
+        <p>
+            Finally, after all topological changes are complete, I update the mesh geometry
+            by setting each vertex's <code>position</code> to the value stored in
+            <code>newPosition</code>.
+        </p>
 
-            <p>
-                When repeatedly applying Loop subdivision to <code>cube.dae</code>, the cube
-                gradually becomes slightly asymmetric. This happens because the triangulation
-                of each face introduces diagonals that are not arranged symmetrically across
-                the cube. As subdivision proceeds, these small asymmetries are amplified by the
-                vertex averaging process, causing the cube to deform unevenly. To reduce this
-                effect, the cube can be preprocessed by performing edge flips so that the
-                diagonals on each face are arranged symmetrically before subdivision. This
-                ensures that the subdivision process treats each face consistently and helps
-                preserve the cube’s symmetry over multiple iterations.
-            </p>
-            <figure></figure>
+        <p>
+            When repeatedly applying Loop subdivision to <code>cube.dae</code>, the cube
+            gradually becomes slightly asymmetric. This happens because the triangulation
+            of each face introduces diagonals that are not arranged symmetrically across
+            the cube. As subdivision proceeds, these small asymmetries are amplified by the
+            vertex averaging process, causing the cube to deform unevenly. To reduce this
+            effect, the cube can be preprocessed by performing edge flips so that the
+            diagonals on each face are arranged symmetrically before subdivision. This
+            ensures that the subdivision process treats each face consistently and helps
+            preserve the cube’s symmetry over multiple iterations.
+        </p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <table style="width: 100%; text-align: center; border-collapse: collapse;">
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task6.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 0</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev1.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 1</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev2.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 2</figcaption>
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="write_up/task1_lev3.png" width="400px" />
+                        <figcaption>task1_curve.bzc at level 3</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </body>
 
