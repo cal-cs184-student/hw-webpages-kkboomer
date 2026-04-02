@@ -97,28 +97,43 @@ Show images with normal shading for a few small .dae files. -->
   Walk through the ray generation and primitive intersection parts of the rendering pipeline.
 </h3>
 <p>
-    We start by looping through every pixel (x, y coordinates), shooting multiple random rays through a single pixel to reduce aliasing. 
-	First, we convert the screen space of the pixel into world space. We normalize the screen coordinates so they sit between 0 and 1, 
-	then map them onto a virtual “sensor plane” in 3D camera space. Next, we create a ray originating from the camera’s position, pointing 
-	towards that specific point on the sensor plane. To translate this into the 3D scene, we multiply the ray's direction vector by a camera-to-world 
-	rotation matrix (c2w) to put it in world space. We also assign the ray a min_t and max_t to ensure no intersections happen out of bounds. We shoot this ray into the scene. 
-	If it hits a primitive, we update the max_t of the ray to equal the distance of the hit. By constantly shrinking max_t with every intersection, 
-	we ensure that we only render the closest object, naturally handling depth and occlusion.
+	<p>We start by looping through every pixel ($x$, $y$ coordinates), 
+		shooting multiple random rays through a single pixel to reduce aliasing. 
+		First, we convert the screen space of the pixel into world space. We normalize 
+		the screen coordinates so they sit between 0 and 1, then map them onto a 
+		virtual “sensor plane” in 3D camera space. Next, we create a ray originating from the 
+		camera’s position, pointing towards that specific point on the sensor plane. To translate 
+		this into the 3D scene, we multiply the ray's direction vector by a camera-to-world 
+		rotation matrix (<code>c2w</code>) to put it in world space. We also assign the ray a <code>min_t</code> 
+		and <code>max_t</code> to ensure no intersections happen out of bounds. We shoot this ray into the scene. 
+		If it hits a primitive, we update the <code>max_t</code> of the ray to equal the distance of the hit. 
+		By constantly shrinking <code>max_t</code> with every intersection, we ensure that we only render the closest object, 
+		naturally handling depth and occlusion.</p>
 </p>
 <br>
 
 <h3>
   Explain the triangle intersection algorithm you implemented in your own words.
 </h3>
-<p>
-    Now that we can shoot a ray, we need to check if it intersects with an object. For triangles, we use the Möller-Trumbore algorithm. 
-	Recall that a ray can be defined as \(R(t)=O+tD\), where O is the origin and D is the direction vector. A point inside a triangle 
-	can be defined using its 3 vertices \(P0​,P1​,P2​\) and barycentric coordinates: P(u,v)=(1−u−v)P0​+uP1​+vP2​
-	To check for an intersection, we set the ray equation equal to the triangle point equation. Using Cramer’s rule, we rearrange the variables to solve for t, u, and v simultaneously. Once we have those values, we perform two strict checks:
-Is the hit within valid bounds? The distance t must be between our clipping planes (ray.min_t <= t <= ray.max_t).
-Is the hit inside the triangle? The barycentric coordinates must be valid (u≥0, v≥0, and u+v≤1).
-If both pass, the ray successfully hit the triangle! We then use those exact u and v values to interpolate the surface normal at the hit point by blending the normals of the 3 vertices: N=(1−u−v)N0​+uN1​+vN2​. Finally, we populate our Intersection struct with this interpolated normal N, the material's BSDF, and the distance t.
-</p>
+<p>Now that we can shoot a ray, we need to check if it intersects with an object. 
+	For triangles, we use the Möller-Trumbore algorithm. Recall that a ray can be defined as $R(t)=O+tD$, 
+	where $O$ is the origin and $D$ is the direction vector. A point inside a triangle can be defined 
+	using its 3 vertices ($P_0, P_1, P_2$) and barycentric coordinates:</p>
+
+	$$P(u,v)=(1-u-v)P_0 + uP_1 + vP_2$$
+
+<p>To check for an intersection, we set the ray equation equal to the triangle point equation. 
+	Using Cramer’s rule, we rearrange the variables to solve for $t$, $u$, and $v$ simultaneously. 
+	Once we have those values, we perform two strict checks:</p>
+<ol>
+    <li><strong>Is the hit within valid bounds?</strong> The distance $t$ must be between our clipping planes (<code>ray.min_t &lt;= t &lt;= ray.max_t</code>).</li>
+    <li><strong>Is the hit inside the triangle?</strong> The barycentric coordinates must be valid ($u \ge 0$, $v \ge 0$, and $u+v \le 1$).</li>
+</ol>
+
+<p>If both pass, the ray successfully hit the triangle! We then use those exact $u$ and $v$ values to 
+	interpolate the surface normal at the hit point by blending the normals of the 3 vertices: 
+	$N=(1-u-v)N_0 + uN_1 + vN_2$. Finally, we populate our <code>Intersection</code> struct 
+	with this interpolated normal $N$, the material's <code>BSDF</code>, and the distance $t$.</p>
 <br>
 
 <h3>
@@ -160,9 +175,20 @@ Compare rendering times on a few scenes with moderately complex geometries with 
 <h3>
   Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<p>My BVH construction algorithm (<code>BVHAccel::construct_bvh</code>) is a top-down, recursive function. When called, it follows these steps:</p>
+<ol>
+    <li><strong>Compute the Bounding Box:</strong> We first compute the bounding box. Iterating through all primitives that the current call has access to, we expand a bounding box big enough to encapsulate all of them. We also compute the bounding box of their centroids, which is used later for splitting nodes.</li>
+    <li><strong>Create the Node:</strong> We then create a new BVH Node and initialize it with this expanded bounding box.</li>
+    <li><strong>The Base Case (Leaf Nodes):</strong> Next, we check if the number of primitives in the current call is less than or equal to <code>max_leaf_size</code>. If it is, the new node becomes a leaf node. We assign primitive iterators to the new node’s <code>start</code> and <code>end</code> pointers, and simply return the node.</li>
+    <li><strong>The Recursive Step:</strong> If that check does not pass, we must split the node. We determine the splitting axis and the split point.</li>
+    <li><strong>Partitioning:</strong> Using <code>std::partition</code>, we reorganize the primitives into two groups depending on whether their centroid is to the right or left of the split point.</li>
+    <li><strong>Edge Case Handling:</strong> If a partition is empty, we force a split exactly down the middle of the array (<code>start + (count / 2)</code>) to ensure the tree keeps breaking down geometry and maintains its structure.</li>
+    <li><strong>Recursion:</strong> Finally, we recursively call the function on the left and right partitions, assigning the returned nodes to the left and right pointers of the new node, and return it.</li>
+</ol>
+
+<p>For the splitting heuristic, I decided to divide the primitives along the longest axis of the overall bounding box’s extent, using the average of the primitive centroids along that axis as the exact split point.</p>
+<p>First, we compare the $x$, $y$, and $z$ extents of the bounding box to determine the longest geometric axis, which guarantees we split along the widest physical dimension, keeping the bounding boxes as cube-like as possible.</p>
+<p>To find the split point, we calculate the average position for all primitive centroids along the chosen axis. This helps distribute the primitives more evenly, creating a much more balanced tree that is significantly faster to traverse while rendering.</p>
 
 <h3>
   Show images with normal shading for a few large .dae files that you can only render with BVH acceleration.
@@ -197,9 +223,19 @@ Compare rendering times on a few scenes with moderately complex geometries with 
 <h3>
   Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<ul>
+    <li><code>CBdragon.dae</code>: count 10012 | 0.1704s (BVH) vs 845.3718s (Naive)</li>
+    <li><code>CBcoil.dae</code>: count 7884 | 0.1478s (BVH) vs 43.6841s (Naive)</li>
+</ul>
+
+<p>As the data shows, implementing the Bounding Volume Hierarchy provided a massive acceleration in rendering times. 
+	Without a BVH, the intersection time per ray is $O(n)$, meaning the path tracer must blindly test the ray against 
+	every single primitive in the scene to find a hit. By organizing the geometry into a tree, the intersection time is 
+	reduced to $O(\log n)$. Instead of testing individual triangles, the ray tests against bounding boxes; 
+	if it misses a box, it instantly prunes that entire branch of the tree, saving thousands of unnecessary calculations. 
+	On the other hand, medium-complexity scenes that naively took tens of seconds now render in fractions of a second, 
+	and massive scenes like <code>dragon.dae</code> that would take over 14 minutes to render without acceleration can 
+	now be completed in under a second.</p>
 <br>
 
 <h2 align="middle">Part 3: Direct Illumination (20 Points)</h2>
@@ -211,9 +247,40 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
 <h3>
   Walk through both implementations of the direct lighting function.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<p>We have 2 main ways of implementing the directing lighting.</p>
+
+<h4>1. Uniform Hemisphere Sampling</h4>
+<p>We first create a local coordinate system where the Z-axis and the surface normal are aligned. 
+	We then perform Monte Carlo integration by looping through a set number of samples. For every 
+	sample, we call <code>hemisphereSampler-&gt;get_sample()</code> to generate a random incoming 
+	direction vector ($w_i$) uniformly distributed across the hemisphere above the hit point.</p>
+
+<p>We convert $w_i$ to world space by multiplying it by the object-to-world matrix, and create a 
+	new shadow ray originating from the hit point. We offset the shadow ray's origin slightly by 
+	setting <code>min_t = EPS_F</code> to prevent the ray from intersecting the surface it just bounced 
+	off of (preventing shadow acne). The shadow ray is then shot into the BVH. If an intersection happens, 
+	we query the emission of the hit object. If the object is a light source, it will return a non-zero radiance ($L_i$).</p>
+
+<p>Finally, we calculate the contribution of this sample using the reflection equation: $L_i \times f(w_{out}, w_{in}) \times w_i.z \times 2\pi$. 
+	(Note: We multiply by $2\pi$ because dividing by the uniform hemisphere PDF of $1/(2\pi)$ is mathematically equivalent). 
+	We end by averaging all the samples together to get the final direct lighting color.</p>
+
+<h4>2. Importance Sampling</h4>
+<p>Instead of sampling randomly, we now only shoot rays directly at the actual light sources. 
+	We loop through all the light sources in the scene. For point or directional lights, 
+	we only take one sample, while for area lights, we take <code>ns_area_light</code> samples.</p>
+
+<p>For every sample, we call the light’s <code>sample_L</code> function, which gives us 
+	the incoming radiance ($L_i$), the light direction ($w_i$), the distance to the light, 
+	and the PDF for the sample. After converting $w_i$ to object space, we check to see if the 
+	light is actually in front of the surface ($w_i.z &gt; 0$); if it is not, we ignore it.</p>
+
+<p>We then construct a shadow ray pointing at the light, making sure to set <code>max_t = distToLight - EPS_F</code>. 
+	This ensures that the ray stops exactly at the light source and is not falsely occluded by an object behind it. 
+	I used the <code>bvh-&gt;has_intersection()</code> function to test for occlusion, since we only care if the light is blocked, 
+	not what blocked it. If the path is clear, we calculate the contribution using the rendering equation and accumulate it into a 
+	running total of outgoing radiance.</p>
+
 
 <h3>
   Show some images rendered with both implementations of the direct lighting function.
@@ -293,9 +360,17 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
 <h3>
   Compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<p>Uniform hemisphere sampling produces a very noisy image. 
+	This is due to the fact that rays are fired randomly into the hemisphere, 
+	with a large majority of them missing the light entirely and returning zero. 
+	Because of this, the renderer must rely on a massive amount of samples to 
+	accurately guess the light's true brightness. Furthermore, point lights are nearly 
+	impossible to render with this method, as the statistical chance of a randomly fired 
+	ray hitting an infinitesimally small point is practically zero. On the other hand, 
+	importance sampling actively targets the light sources, guaranteeing that every 
+	single un-occluded ray returns valid light data. This allows the sampling to converge 
+	almost immediately, producing smooth gradients and crisp soft shadows without wasting 
+	computational power on rays that hit dark, empty space.</p>
 <br>
 
 
@@ -470,22 +545,22 @@ Pick one scene and render it with at least 2048 samples per pixel. Show a good s
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Rendered image (example1.dae)</figcaption>
+        <img src="images/bunny_adaptive.png" align="middle" width="400px"/>
+        <figcaption>Rendered image (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Sample rate image (example1.dae)</figcaption>
+        <img src="images/bunny_adaptive_rate.png" align="middle" width="400px"/>
+        <figcaption>Sample rate image (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Rendered image (example2.dae)</figcaption>
+        <img src="images/spheres_adaptive.png" align="middle" width="400px"/>
+        <figcaption>Rendered image (CBspheres_lambertian.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Sample rate image (example2.dae)</figcaption>
+        <img src="images/spheres_adaptive_rate.png" align="middle" width="400px"/>
+        <figcaption>Sample rate image (CBspheres_lambertian.dae)</figcaption>
       </td>
     </tr>
   </table>
