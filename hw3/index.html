@@ -385,9 +385,21 @@ You will probably want to use the instructional machines for the above renders i
 <h3>
   Walk through your implementation of the indirect lighting function.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<p>The core of global illumination is handled by the <code>at_least_one_bounce_radiance()</code> function, 
+	which allows rays to bounce multiple times to accumulate indirect light. Because light can bounce infinitely, 
+	this is implemented as a recursive function with strict termination conditions.</p>
+
+<ol>
+    <li><strong>The Base Case:</strong> We begin by calculating the direct illumination at the current intersection using <code>one_bounce_radiance()</code> and adding it to our total outgoing radiance ($L_{out}$). If the current ray’s depth is 1, this means the ray is on its final permitted bounce, so we immediately return $L_{out}$ and stop recursing.</li>
+    <li><strong>Russian Roulette (Termination):</strong> To efficiently prevent infinite recursion without artificially darkening the image, we use Russian Roulette. We set a continuation probability of 0.7 (meaning a 70% chance that a ray survives the bounce) and flip a weighted coin. If the coin returns false, we terminate early. <em>Note: Because the project specifies that we must trace at least one indirect bounce (if <code>max_ray_depth &gt; 1</code>), we only subject the ray to this coin flip on the second bounce and beyond.</em></li>
+    <li><strong>Sampling the Bounce:</strong> If the ray survives, we call the material's <code>sample_f()</code> method. This returns a random incoming direction vector in object space ($w_i$), the probability of that direction being chosen ($pdf$), and the material’s reflectance ($f$).</li>
+    <li><strong>Shooting the Recursive Ray:</strong> After converting $w_i$ to world space by multiplying it by the object-to-world matrix (<code>o2w</code>), we create a new <code>bounce_ray</code> originating from the current hit point. We offset it slightly (<code>min_t = EPS_F</code>) to prevent shadow acne, and—crucially—decrement the ray’s depth by 1.</li>
+    <li><strong>The Recursive Equation:</strong> We then shoot this new ray into the BVH. If it hits another object, we recursively call <code>at_least_one_bounce_radiance()</code> on the new intersection to gather the incoming light ($L_{in}$) bouncing from the rest of the scene. Finally, we apply the rendering equation: we multiply the incoming light by the reflectance and the cosine of the incoming angle, and divide by both the sampling PDF and the Russian Roulette continuation probability:</li>
+</ol>
+
+$$L_{out} \mathrel{+}= \frac{L_{in} \times f \times w_i.z}{pdf \times cpdf}$$
+
+<p>We add this evaluated indirect light to $L_{out}$ and return the final accumulated color.</p>
 <br>
 
 <h3>
@@ -418,12 +430,12 @@ You will probably want to use the instructional machines for the above renders i
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Only direct illumination (example1.dae)</figcaption>
+        <img src="images/bunny_direct_only.png" align="middle" width="400px"/>
+        <figcaption>Only direct illumination (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>Only indirect illumination (example1.dae)</figcaption>
+        <img src="images/bunny_indirect_only.png" align="middle" width="400px"/>
+        <figcaption>Only indirect illumination (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
@@ -462,7 +474,7 @@ You will probably want to use the instructional machines for the above renders i
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
+        <img src="images/bunny_accum_100.png" align="middle" width="400px"/>
         <figcaption>max_ray_depth = 100 (CBbunny.dae)</figcaption>
       </td>
     </tr>
@@ -483,37 +495,37 @@ You will probably want to use the instructional machines for the above renders i
     <tr align="center">
       <td>
         <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>1 sample per pixel (example1.dae)</figcaption>
+        <figcaption>1 sample per pixel (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>2 samples per pixel (example1.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>4 samples per pixel (example1.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>8 samples per pixel (example1.dae)</figcaption>
+        <figcaption>2 samples per pixel (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
         <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>16 samples per pixel (example1.dae)</figcaption>
+        <figcaption>4 samples per pixel (CBbunny.dae)</figcaption>
       </td>
       <td>
         <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>64 samples per pixel (example1.dae)</figcaption>
+        <figcaption>8 samples per pixel (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
         <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>1024 samples per pixel (example1.dae)</figcaption>
+        <figcaption>16 samples per pixel (CBbunny.dae)</figcaption>
+      </td>
+      <td>
+        <img src="images/your_file.png" align="middle" width="400px"/>
+        <figcaption>64 samples per pixel (CBbunny.dae)</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/your_file.png" align="middle" width="400px"/>
+        <figcaption>1024 samples per pixel (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
