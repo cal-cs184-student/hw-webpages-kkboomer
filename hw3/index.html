@@ -39,9 +39,9 @@
 
 <body>
 
-<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2023</h1>
-<h1 align="middle">Project 3-1: Path Tracer</h1>
-<h2 align="middle">YOUR NAME(S)</h2>
+<h1 align="middle">CS 184 Spring 2026</h1>
+<h1 align="middle">Project 3: Path Tracer</h1>
+<h2 align="middle">Kellen Galban</h2>
 
 <!-- Add Website URL -->
 <h2 align="middle">Website URL: <a href="TODO">TODO</a></h2>
@@ -49,43 +49,14 @@
 <br><br>
 
 
-<div align="center">
-  <table style="width=100%">
-      <tr>
-          <td align="middle">
-          <img src="images/example_image.png" width="480px" />
-          <figcaption align="middle">Results Caption: my bunny is the bounciest bunny</figcaption>
-      </tr>
-  </table>
-</div>
-
-<p>All of the text in your write-up should be <em>in your own words</em>. If you need to add additional HTML features to this document, you can search the <a href="http://www.w3schools.com/">http://www.w3schools.com/</a> website for instructions. To edit the HTML, you can just copy and paste existing chunks and fill in the text and image file names appropriately.</p>
-<o>The website writeup is intended to be a self-contained walkthrough of the assignment: we want this to be a piece of work which showcases your understanding of relevant concepts through both mesh images as well as written explanations about what you did to complete each part of the assignment. Try to be as clear and organized as possible when writing about your own output files or extensions to the assignment. We want to understand what you've achieved and how you've done it!</p> 
-<p>If you are well-versed in web development, feel free to ditch this template and make a better looking page.</p>
-
-
-<p>Here are a few problems students have encountered in the past. Test your website on the instructional machines early!</p>
-<ul>
-<li>Your main report page should be called index.html.</li>
-<li>Be sure to include and turn in all of the other files (such as images) that are linked in your report!</li>
-<li>Use only <em>relative</em> paths to files, such as <pre>"./images/image.jpg"</pre>
-Do <em>NOT</em> use absolute paths, such as <pre>"/Users/student/Desktop/image.jpg"</pre></li>
-<li>Pay close attention to your filename extensions. Remember that on UNIX systems (such as the instructional machines), capitalization matters. <pre>.png != .jpeg != .jpg != .JPG</pre></li>
-<li>Be sure to adjust the permissions on your files so that they are world readable. For more information on this please see this tutorial: <a href="http://www.grymoire.com/Unix/Permissions.html">http://www.grymoire.com/Unix/Permissions.html</a></li>
-<li>And again, test your website on the instructional machines early!</li>
-</ul>
-
-
-<p>Here is an example of how to include a simple formula:</p>
-<p align="middle"><pre align="middle">a^2 + b^2 = c^2</pre></p>
-<p>or, alternatively, you can include an SVG image of a LaTex formula.</p>
 
 <div>
 
 <h2 align="middle">Overview</h2>
 <p>
-    YOUR RESPONSE GOES HERE
-</p>
+Over the past few weeks I implemented a simple raytracer which relies on drawing many rays to get the light contribution 
+of a surface and return accurate and realistic lighting. I had a lot of fun seeing the lighting get more realistic and 
+less grainy over the tasks, and it gave me valuble expreince for the upcoming final project.</p>
 <br>
 
 <h2 align="middle">Part 1: Ray Generation and Scene Intersection (20 Points)</h2>
@@ -144,22 +115,22 @@ Show images with normal shading for a few small .dae files. -->
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/empty_normal.png" align="middle" width="400px"/>
+        <figcaption>CBempty.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/spheres_normal.png" align="middle" width="400px"/>
+        <figcaption>CBspheres_lambertian.dae</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example3.dae</figcaption>
+        <img src="images/gems_normal.png" align="middle" width="400px"/>
+        <figcaption>CBgems.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example4.dae</figcaption>
+        <img src="images/cube_normal.png" align="middle" width="400px"/>
+        <figcaption>cube.dae</figcaption>
       </td>
     </tr>
   </table>
@@ -198,22 +169,22 @@ Compare rendering times on a few scenes with moderately complex geometries with 
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/maxplanck_normal.png" align="middle" width="400px"/>
+        <figcaption>maxplanck.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/cow_normal.png" align="middle" width="400px"/>
+        <figcaption>cow.dae</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example3.dae</figcaption>
+        <img src="images/lucy_normal.png" align="middle" width="400px"/>
+        <figcaption>CBlucy.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example4.dae</figcaption>
+        <img src="images/blob_normal.png" align="middle" width="400px"/>
+        <figcaption>blob.dae</figcaption>
       </td>
     </tr>
   </table>
@@ -221,7 +192,8 @@ Compare rendering times on a few scenes with moderately complex geometries with 
 <br>
 
 <h3>
-  Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.
+  Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. 
+  Present your results in a one-paragraph analysis.
 </h3>
 <ul>
     <li><code>CBdragon.dae</code>: count 10012 | 0.1704s (BVH) vs 845.3718s (Naive)</li>
@@ -294,29 +266,29 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
         <b>Uniform Hemisphere Sampling</b>
       </th>
       <th>
-        <b>Light Sampling</b>
+        <b>Importance Sampling</b>
       </th>
     </tr>
     <br>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/bunny_hemisphere.png" align="middle" width="400px"/>
+        <figcaption>CBbunny.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
+        <img src="images/bunny_importance.png" align="middle" width="400px"/>
+        <figcaption>CBbunny.dae</figcaption>
       </td>
     </tr>
     <br>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/spheres_hemisphere.png" align="middle" width="400px"/>
+        <figcaption>CBspheres_lambertian.dae</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
+        <img src="images/spheres_importance.png" align="middle" width="400px"/>
+        <figcaption>CBspheres_lambertian.dae</figcaption>
       </td>
     </tr>
     <br>
@@ -332,28 +304,35 @@ Compare the results between uniform hemisphere sampling and lighting sampling in
   <table style="width:100%">
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>1 Light Ray (example1.dae)</figcaption>
+        <img src="images/bunny_l_1.png" align="middle" width="200px"/>
+        <figcaption>1 Light Ray (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>4 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_l_4.png" align="middle" width="200px"/>
+        <figcaption>4 Light Rays (CBbunny.dae)</figcaption>
       </td>
     </tr>
     <tr align="center">
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>16 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_l_16.png" align="middle" width="200px"/>
+        <figcaption>16 Light Rays (CBbunny.dae)</figcaption>
       </td>
       <td>
-        <img src="images/your_file.png" align="middle" width="200px"/>
-        <figcaption>64 Light Rays (example1.dae)</figcaption>
+        <img src="images/bunny_l_64.png" align="middle" width="200px"/>
+        <figcaption>64 Light Rays (CBbunny.dae)</figcaption>
       </td>
     </tr>
   </table>
 </div>
 <p>
-    YOUR EXPLANATION GOES HERE
+    By keeping the camera rays fixed at 1 sample per pixel and only increasing the light rays, 
+	we can clearly isolate the variance generated by the area light. At 1 light ray, the shadow 
+	beneath the bunny is incredibly noisy and disjointed, appearing as scattered black dots rather 
+	than a cohesive shadow gradient. As we increase to 4 and 16 light rays, the shadow begins to 
+	form a defined shape, but severe noise remains in the soft edges of the shadow. 
+	By 64 light rays, the variance drops significantly, creating a much smoother and more accurate 
+	soft shadow beneath the geometry, demonstrating that higher light sampling rates are critical 
+	for resolving area lights accurately.
 </p>
 <br>
 
@@ -403,138 +382,242 @@ $$L_{out} \mathrel{+}= \frac{L_{in} \times f \times w_i.z}{pdf \times cpdf}$$
 <br>
 
 <h3>
-  Show some images rendered with global (direct and indirect) illumination. Use 1024 samples per pixel.
-</h3>
-<!-- Example of including multiple figures -->
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example1.dae</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>example2.dae</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-<br>
-
-<h3>
-  Pick one scene and compare rendered views first with only direct illumination, then only indirect illumination. Use 1024 samples per pixel. (You will have to edit PathTracer::at_least_one_bounce_radiance(...) in your code to generate these views.)
-</h3>
-<!-- Example of including multiple figures -->
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td>
-        <img src="images/bunny_direct_only.png" align="middle" width="400px"/>
-        <figcaption>Only direct illumination (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/bunny_indirect_only.png" align="middle" width="400px"/>
-        <figcaption>Only indirect illumination (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-<br>
-<p>
-    YOUR EXPLANATION GOES HERE
-</p>
-<br>
-
-<h3>
-  For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 100 (the -m flag). Use 1024 samples per pixel.
-</h3>
-<!-- Example of including multiple figures -->
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>max_ray_depth = 0 (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>max_ray_depth = 1 (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>max_ray_depth = 2 (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>max_ray_depth = 3 (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/bunny_accum_100.png" align="middle" width="400px"/>
-        <figcaption>max_ray_depth = 100 (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-<br>
-<p>
-    YOUR EXPLANATION GOES HERE
-</p>
-<br>
-
-<h3>
-  Pick one scene and compare rendered views with various sample-per-pixel rates, including at least 1, 2, 4, 8, 16, 64, and 1024. Use 4 light rays.
-</h3>
-<!-- Example of including multiple figures -->
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>1 sample per pixel (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>2 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>4 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>8 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>16 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>64 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <img src="images/your_file.png" align="middle" width="400px"/>
-        <figcaption>1024 samples per pixel (CBbunny.dae)</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-<br>
-<p>
-    YOUR EXPLANATION GOES HERE
-</p>
-<br>
+	Show some images rendered with global (direct and indirect) illumination. Use 1024 samples per pixel.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_5.png" align="middle" width="400px"/>
+		  <figcaption>CBbunny.dae</figcaption>
+		</td>
+		<td>
+		  <img src="images/spheres_adaptive.png" align="middle" width="400px"/>
+		  <figcaption>CBspheres_lambertian.dae</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  
+  <h3>
+	Pick one scene and compare rendered views first with only direct illumination, then only indirect illumination. Use 1024 samples per pixel.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_direct_only.png" align="middle" width="400px"/>
+		  <figcaption>Only direct illumination (CBbunny.dae)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_indirect_only.png" align="middle" width="400px"/>
+		  <figcaption>Only indirect illumination (CBbunny.dae)</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  <p>
+	  When comparing these two images, the direct illumination render shows only the light hitting the bunny and the walls straight from the ceiling light. The shadows are pitch black, and the ceiling itself is completely unlit because no light has bounced up to hit it. The indirect illumination render, on the other hand, shows only the light that has bounced at least once. Here, the ceiling light is black (zero bounces) and the direct highlights are missing, but the shadows are softly filled, the ceiling is illuminated, and we can clearly see the red and blue color bleeding from the walls onto the bunny.
+  </p>
+  <br>
+  
+  <h3>
+	For CBbunny.dae, render the mth bounce of light with max_ray_depth set to 
+	0, 1, 2, 3, 4, and 5 (the -m flag), and isAccumBounces=false.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_unaccum_0.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 0 (Unaccumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_unaccum_1.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 1 (Unaccumulated)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_unaccum_2.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 2 (Unaccumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_unaccum_3.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 3 (Unaccumulated)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_unaccum_4.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 4 (Unaccumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_unaccum_5.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 5 (Unaccumulated)</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  <p>
+	  Viewing the unaccumulated bounces in isolation provides a clear visualization of how global 
+	  illumination is constructed. The <code>m=0</code> render shows only the light source emission, 
+	  while <code>m=1</code> reveals harsh direct lighting with pitch-black shadows and an unlit ceiling. 
+	  The <code>m=2</code> unaccumulated render isolates the first indirect bounce, distinctly showing the 
+	  color bleeding from the Cornell Box walls onto the bunny's geometry. Subsequent unaccumulated bounces 
+	  (<code>m=3, 4, 5</code>) become progressively dimmer, representing the rapidly decaying light that faintly 
+	  fills in the deepest crevices of the scene.
+  </p>
+  <br>
+  
+  <h3>
+	Compare rendered views of accumulated bounces for CBbunny.dae with max_ray_depth set to 
+	0, 1, 2, 3, 4, and 5 (the -m flag). Use 1024 samples per pixel.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_0.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 0 (Accumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_1.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 1 (Accumulated)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_2.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 2 (Accumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_3.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 3 (Accumulated)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_4.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 4 (Accumulated)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_5.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 5 (Accumulated)</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  <p>
+	  When these bounces are accumulated, we see the true power of global illumination. 
+	  The jump from <code>m=1</code> to <code>m=2</code> produces the most dramatic change 
+	  in the accumulated image: the pitch-black shadows are softened by ambient fill light, 
+	  the ceiling is illuminated, and the scene gains a realistic color bleed. Moving to 
+	  <code>m=3</code> adds subtle brightness and further softens the darkest corners. By 
+	  <code>m=4</code> and <code>m=5</code>, the accumulated image has largely converged, 
+	  as the energy contributed by these higher-order bounces is statistically negligible 
+	  compared to the first few bounces.
+  </p>
+  <br>
+  
+  <h3>
+	For CBbunny.dae, output the Russian Roulette rendering with max_ray_depth set to 0
+	, 1, 2, 3, 4, and 100 (the -m flag). Use 1024 samples per pixel.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_0.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 0 (RR)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_1.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 1 (RR)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_2.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 2 (RR)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_3.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 3 (RR)</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/bunny_accum_4.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 4 (RR)</figcaption>
+		</td>
+		<td>
+		  <img src="images/bunny_accum_100.png" align="middle" width="400px"/>
+		  <figcaption>max_ray_depth = 100 (RR)</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  
+  <h3>
+	Pick one scene and compare rendered views with various 
+	sample-per-pixel rates, including at least 1, 2, 4, 8, 16, 64, and 1024. Use 4 light rays.
+  </h3>
+  <div align="middle">
+	<table style="width:100%">
+	  <tr align="center">
+		<td>
+		  <img src="images/gems_rate_1.png" align="middle" width="400px"/>
+		  <figcaption>1 sample per pixel (CBgems.dae)</figcaption>
+		</td>
+		<td>
+		  <img src="images/gems_rate_2.png" align="middle" width="400px"/>
+		  <figcaption>2 samples per pixel</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/gems_rate_4.png" align="middle" width="400px"/>
+		  <figcaption>4 samples per pixel</figcaption>
+		</td>
+		<td>
+		  <img src="images/gems_rate_8.png" align="middle" width="400px"/>
+		  <figcaption>8 samples per pixel</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/gems_rate_16.png" align="middle" width="400px"/>
+		  <figcaption>16 samples per pixel</figcaption>
+		</td>
+		<td>
+		  <img src="images/gems_rate_64.png" align="middle" width="400px"/>
+		  <figcaption>64 samples per pixel</figcaption>
+		</td>
+	  </tr>
+	  <tr align="center">
+		<td>
+		  <img src="images/gems_rate_1024.png" align="middle" width="400px"/>
+		  <figcaption>1024 samples per pixel</figcaption>
+		</td>
+	  </tr>
+	</table>
+  </div>
+  <br>
+  <p>
+	  As the sample rate increases, the high amount of noise present in the image smoothly diminishes. 
+	  At 1 and 2 samples per pixel, the image is incredibly grainy, making it difficult to discern smooth 
+	  gradients or soft shadows. By 16 to 64 samples, the scene geometry begins to look clean, though the 
+	  soft shadows on the floor and the edges still have visible noise. Finally, at 1024 samples, the Monte 
+	  Carlo integration has completely converged, producing a perfectly smooth and highly realistic image without 
+	  any noticeable artifacts. While the gems themselves have no color, the grainiess reducing as the rate goes up is clear.
+  </p>
+  <br>
 
 
 <h2 align="middle">Part 5: Adaptive Sampling (20 Points)</h2>
@@ -544,9 +627,32 @@ Pick one scene and render it with at least 2048 samples per pixel. Show a good s
 <h3>
   Explain adaptive sampling. Walk through your implementation of the adaptive sampling.
 </h3>
-<p>
-    YOUR RESPONSE GOES HERE
-</p>
+<h3>Adaptive Sampling</h3>
+<p>With Monte Carlo based path tracing, some pixels converge to their true color much faster than others. 
+	Objects like flat walls may only need a small amount of samples to converge, while soft shadows may need all given samples to 
+	converge. Adaptive sampling is an optimization that tracks the color of the pixels as it renders; when the color stops f
+	luctuating, we assume convergence and stop shooting rays.</p>
+
+<p>Here is how I implemented it in <code>raytrace_pixel</code>:</p>
+
+<p>Instead of storing an array of every single ray color, we maintain a running sum of the ray’s illuminance and squared 
+	illuminance ($s_1$ and $s_2$ respectively), and a counter for the number of rays shot so far ($n$). Additionally, 
+	I now only perform the convergence check every <code>samplesPerBatch</code> number of rays to save on computation.</p>
+
+<p>When we do check, we calculate the mean ($\mu$) and standard deviation ($\sigma$) of the samples gathered so far:</p>
+
+$$ \mu = \frac{s_1}{n} $$
+$$ \sigma = \sqrt{\frac{1}{n-1} \left( s_2 - \frac{s_1^2}{n} \right)} $$
+
+<p>Using those values, we calculate the confidence interval variable $I$:</p>
+
+$$ I = 1.96 \times \frac{\sigma}{\sqrt{n}} $$
+
+<p>If $I \le \text{maxTolerance} \times \mu$, we are within the 95% interval of confidence that the pixel has converged, 
+	at which point we break out of the loop. Once we reach the end of the loop by either breaking early or taking <code>ns_aa</code> 
+	amount of samples, we divide the total accumulated radiance by the real number of samples ($n$) rather than the max number of 
+	samples, so as to not decrease overall luminance. We end by recording $n$ in the <code>sampleCountBuffer</code> so we can 
+	accurately generate the heat map.</p>
 <br>
 
 <h3>
