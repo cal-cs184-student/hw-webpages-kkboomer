@@ -138,14 +138,14 @@
 				sagging.</li>
 			<li><strong>Damping:</strong> Damping simulates energy loss over time due to air resistance and internal
 				friction. With very low damping, the cloth swings violently back and forth, taking a long time to come
-				to a complete rest. With high damping, the cloth falls slowly and sluggishly—as if moving through a
-				thick liquid—and settles into its resting state almost immediately without oscillating.</li>
+				to a complete rest. With high damping, the cloth falls slowly and sluggishly and settles into its
+				resting state almost immediately without oscillating.</li>
 		</ul>
 
 		<div align="center">
 			<h4>The 4-Pin Rest State</h4>
 			<img src="imi/pinned4_rest.png" alt="4-Pin Rest State" width="600vw" />
-			<figcaption>Default Parameters (density = 15, ks = 5000, damping = 0.2%)</figcaption>
+			<figcaption>Default Parameters (density = 15 g/cm^2, ks = 5000 N/m, damping = 0.2%)</figcaption>
 		</div>
 
 		<br><br>
@@ -203,11 +203,27 @@
 		</div>
 
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-		laborum.
+		<p>Up until this point, our simulation did not account for other physical objects, meaning the cloth would
+			simply fall through the floor or any items in its path. In this section, we implemented collision detection
+			and physical responses for primitive objects, specifically spheres and planes. To apply these checks, we
+			added a loop inside the <code>simulate()</code> function, right before the spring correction step, to
+			iterate through all point masses and resolve collisions against all objects in the scene.</p>
+
+		<h4>Sphere Collisions</h4>
+		<p>To detect a collision with a sphere, we check if the distance from the point mass to the center of the sphere
+			is less than the sphere's radius. If it is, the point has clipped inside the object. We correct this by
+			computing where the point mass should have intersected the sphere's surface (by extending a direction
+			vector from the sphere's origin to the point mass). We then calculate a correction vector to push the point
+			mass to this surface position, and apply it scaled by a factor of <code>(1.0 - friction)</code> to simulate
+			physical resistance.</p>
+
+		<h4>Plane Collisions</h4>
+		<p>Because a plane is infinitely thin, we use a different approach. We check if a point mass crossed from one
+			side of the plane to the other during the span of a single time step by evaluating the dot products of the
+			plane's normal with the point's current and previous positions. If the point crossed the boundary, we
+			calculate the exact point of intersection and push the point mass back up to the correct side. We also add a
+			small <code>SURFACE_OFFSET</code> to the final position to prevent continuous clipping and visual
+			z-fighting.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 				<tr>
@@ -217,13 +233,13 @@
 					</td>
 					<td style="text-align: center;">
 						<img src="imi/t3_sphere_50k.png" width="400px" />
-						<figcaption>sphere.json at ks = 50000</figcaption>
+						<figcaption>sphere.json at ks = 50000 N/m</figcaption>
 					</td>
 				</tr>
 				<tr>
 					<td style="text-align: center;">
 						<img src="imi/t3_sphere_500.png" width="400px" />
-						<figcaption>sphere.json at 500 ks</figcaption>
+						<figcaption>sphere.json at ks = 500 N/m</figcaption>
 					</td>
 					<td style="text-align: center;">
 						<img src="imi/t3_plan.png" width="400px" />
@@ -233,11 +249,102 @@
 			</table>
 		</div>
 		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-		laborum.
+		<p>A naive approach to preventing the cloth from clipping through itself would be to loop over all pairs of
+			<code>PointMasses</code>, check for invalid distances between them, and apply a correcting force. However,
+			this is an $O(n^2)$ solution, which is far too computationally expensive for real-time simulations. Instead,
+			we optimize this process using <strong>spatial hashing</strong>, which relies on three main methods to group
+			nearby point masses together.</p>
+
+		<h4><code>hash_position()</code></h4>
+		<p>This function takes a point mass's position and returns a unique float identifier (the hash) representing the
+			specific 3D bounding box that the point currently occupies. We first partition the 3D space into boxes of
+			dimensions <code>w</code>, <code>h</code>, and <code>t</code>. By dividing the point's coordinates by these
+			dimensions and flooring the results, we determine the 3D grid index (<code>x_box</code>, <code>y_box</code>,
+			and <code>z_box</code>). We then combine these indices mathematically using uniquely large primes to
+			generate a distinct 1D hash key.</p>
+
+		<h4><code>build_spatial_map()</code></h4>
+		<p>This function populates the spatial hash map (a dictionary mapping a float hash to a vector of
+			<code>PointMass</code> pointers) that we use to quickly look up neighboring points. We first clear the map
+			to ensure no residual data remains from the previous time step. Then, we iterate through every point mass in
+			the cloth, calculate its hash using <code>hash_position()</code>, and add the point mass to the
+			corresponding vector in the map.</p>
+
+		<h4><code>self_collide()</code></h4>
+		<p>This is the main function used to check and resolve collisions. Given a specific point mass, we look up its
+			hash and retrieve the list of candidate point masses that share the same bounding box. For every candidate
+			(that is not the point mass itself), we calculate the distance between the two points. If this distance is
+			less than <code>2 * thickness</code>, it means they are clipping. We calculate a correction vector to push
+			the point mass away so the distance exactly equals <code>2 * thickness</code>, and add it to a running
+			adjustment tally. Finally, if any corrections were made, we average the adjustment vector by the total
+			number of corrections and scale it down by the number of simulation steps (to ensure stability) before
+			applying it to the point mass's position.</p>
+
+		<p>To tie it all together, we added a loop inside the <code>simulate()</code> function, right before the object
+			collision check, to run this <code>self_collide()</code> logic on every point mass.</p>
+
+		<br>
+
+		<div align="center">
+			<h4>Cloth Folding Sequence (Default Parameters)</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/earlycollapse.png" alt="Initial fold" width="300vw" />
+						<figcaption>Initial contact with the ground</figcaption>
+					</td>
+					<td>
+						<img src="imi/midcollapse.png" alt="Middle fold" width="300vw" />
+						<figcaption>Middle of the folding process</figcaption>
+					</td>
+					<td>
+						<img src="imi/endingcollapse2.png" alt="Resting fold" width="300vw" />
+						<figcaption>Final resting state</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br><br>
+
+		<div align="center">
+			<h4>Varying Density on Self-Collisions</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/density3.png" alt="Low Density Fold" width="400vw" />
+						<figcaption><strong>Low Density (e.g., 3 g/cm^2)</strong><br>The cloth is light and folds
+							cleanly, creating smooth, wide ribbons as it piles up.</figcaption>
+					</td>
+					<td>
+						<img src="imi/density50.png" alt="High Density Fold" width="400vw" />
+						<figcaption><strong>High Density (e.g., 50 g/cm^2)</strong><br>The heavier cloth crumples
+							tightly under its own weight, resulting in chaotic, compressed folds.</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br>
+
+		<div align="center">
+			<h4>Varying Spring Constant (ks) on Self-Collisions</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/t4ks500.png" alt="Low ks Fold" width="400vw" />
+						<figcaption><strong>Low <code>ks</code> (e.g., 500 N/m)</strong><br>The weak springs cause the
+							cloth to ripple and bunch up into a tight, incredibly wrinkled pile.</figcaption>
+					</td>
+					<td>
+						<img src="imi/t4ks50000.png" alt="High ks Fold" width="400vw" />
+						<figcaption><strong>High <code>ks</code> (e.g., 50,000 N/m)</strong><br>The rigid cloth resists
+							bending, resulting in large, stiff, overarching folds rather than tight crumples.
+						</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
 
 		<h2>Part 5: Shaders</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
