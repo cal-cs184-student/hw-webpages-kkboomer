@@ -1,32 +1,34 @@
 <html>
-	<head>
-		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<style>
-			h1 {
-				text-align: center;
-			}
 
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
+<head>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+	<style>
+		h1 {
+			text-align: center;
+		}
 
-			figure {
-				text-align: center;
-			}
+		.container {
+			margin: 0 auto;
+			padding: 60px 20%;
+		}
 
-			img {
-				display: inline-block;
-			}
+		figure {
+			text-align: center;
+		}
 
-			body {
-				font-family: 'Inter', sans-serif;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
+		img {
+			display: inline-block;
+		}
+
+		body {
+			font-family: 'Inter', sans-serif;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 4 Write-Up</h1>
 		<div style="text-align: center;">Names: Kellen Galban</div>
 
@@ -36,10 +38,11 @@
 
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: (TODO) <a
+			href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 		<figure>
-			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%"/>
+			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%" />
 			<figcaption>You can add images with captions!</figcaption>
 		</figure>
 
@@ -48,92 +51,201 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. 
+		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole.
 		Share your thoughts on what interesting things you've learned from completing the homework.
 
 
-		Over the past few weeks I have implemented the basic framework that is capable of simulating cloth physics and how
+		Over the past few weeks I have implemented the basic framework that is capable of simulating cloth physics and
+		how
 		it interacts with light, objects, and itself.
 
 
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<h4>Building the Grid</h4>
+		<p>We create this grid by looping through the specified <code>num_width_points</code> and
+			<code>num_height_points</code>. For each (x, y) coordinate, we calculate the physical spatial position of
+			the point mass by multiplying its coordinate indices by a step size (defined as the total width or height
+			divided by the number of points minus 1).</p>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
+		<p>We also check the provided <code>pinned</code> vector to determine if the current coordinate should be fixed
+			in place. If a coordinate matches a pin location, we set the pinned boolean on that newly created
+			<code>PointMass</code> to <code>true</code> (rather than ignoring it entirely, so it still exists in the
+			physics system but its position will not update during integration). We then store all of these initialized
+			point masses into a single, contiguous 1D array using row-major ordering.</p>
+
+		<h4>Applying the Springs</h4>
+		<p>Once the points are established, we loop through the grid a second time to connect them. Because our
+			<code>point_masses</code> vector is 1-dimensional, we access the current point mass using the row-major
+			index formula: <code>index = y * num_width_points + x</code>.</p>
+
+		<p>From here, we evaluate the (x, y) coordinates to apply three distinct types of spring constraints, saving the
+			resulting <code>Spring</code> objects to our <code>springs</code> vector:</p>
+
+		<ul>
+			<li><strong>Structural Springs:</strong> We connect a point mass to its immediate neighbor directly to its
+				left and directly above it. This provides the primary tensile strength, preventing the cloth from simply
+				falling apart.</li>
+			<li><strong>Shearing Springs:</strong> We connect a point mass to its diagonal neighbors (top-left and
+				top-right). This cross-bracing provides resistance against the structural quads collapsing into skewed
+				diamond shapes.</li>
+			<li><strong>Bending Springs:</strong> We connect a point mass to the neighbor located exactly two spots away
+				to the left, and two spots above. This provides resistance against extreme, sharp folds, ensuring the
+				cloth bends smoothly rather than creasing like paper.</li>
+		</ul>
+
+		<div align="center">
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/struc_bend.png" alt="No shearing constraints, only structural and bending"
+							width="400vw" />
+						<figcaption>No shearing constraints, only structural and bending</figcaption>
+					</td>
+					<td>
+						<img src="imi/shear.png" alt="Only shearing constraints" width="400vw" />
+						<figcaption>Only shearing constraints</figcaption>
+					</td>
+					<td>
+						<img src="imi/all_spring.png" alt="All constraints enabled" width="400vw" />
+						<figcaption>All constraints enabled</figcaption>
+					</td>
+				</tr>
 			</table>
 		</div>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<h4>Verlet Integration and Spring Correction</h4>
+		<p>To simulate the cloth’s motion over time, we implement numerical integration, specifically Verlet
+			integration. Instead of explicitly tracking velocity, we calculate the new position of each point mass based
+			on its current position, its previous position, and the total accumulated forces (such as gravity and spring
+			tension) acting on it.</p>
+
+		<p>After calculating the new positions, we apply a constraint update. To ensure the cloth does not stretch
+			infinitely or deform unrealistically, we correct the point masses so that no spring is ever stretched beyond
+			10% of its original resting length during a single time step.</p>
+
+		<h4>Parameter Experimentation</h4>
+		<ul>
+			<li><strong>Spring Constant (<code>ks</code>):</strong> The spring constant determines how much force is
+				needed to stretch the spring. A lower <code>ks</code> results in a highly elastic, stretchy cloth that
+				bounces significantly. Conversely, a high <code>ks</code> creates a stiff, rigid cloth that strongly
+				resists deformation.</li>
+			<li><strong>Density:</strong> Density dictates the overall mass of the cloth. A higher density means a
+				heavier cloth, which sags deeply under its own weight and smooths out creases as it pulls downward. A
+				lower density means a lighter cloth, allowing the springs to easily hold their shape with minimal
+				sagging.</li>
+			<li><strong>Damping:</strong> Damping simulates energy loss over time due to air resistance and internal
+				friction. With very low damping, the cloth swings violently back and forth, taking a long time to come
+				to a complete rest. With high damping, the cloth falls slowly and sluggishly—as if moving through a
+				thick liquid—and settles into its resting state almost immediately without oscillating.</li>
+		</ul>
+
+		<div align="center">
+			<h4>The 4-Pin Rest State</h4>
+			<img src="imi/pinned4_rest.png" alt="4-Pin Rest State" width="600vw" />
+			<figcaption>Default Parameters (density = 15, ks = 5000, damping = 0.2%)</figcaption>
+		</div>
+
+		<br><br>
+
+		<div align="center">
+			<h4>Comparing Spring Constants (ks)</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/sim_lowks.png" alt="Low ks" width="400vw" />
+						<figcaption>Low <code>ks</code> (e.g., 500 N/m)</figcaption>
+					</td>
+					<td>
+						<img src="imi/sim_highks.png" alt="High ks" width="400vw" />
+						<figcaption>High <code>ks</code> (e.g., 50,000 N/m)</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br>
+
+		<div align="center">
+			<h4>Comparing Density</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/sim_lowdensity.png" alt="Low Density" width="400vw" />
+						<figcaption>Low Density (e.g., 3 g/cm^2)</figcaption>
+					</td>
+					<td>
+						<img src="imi/sim_highdensity.png" alt="High Density" width="400vw" />
+						<figcaption>High Density (e.g., 50 g/cm^2)</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br>
+
+		<div align="center">
+			<h4>Comparing Damping</h4>
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/sim_nodamp.png" alt="Low Damping" width="400vw" />
+						<figcaption>Low Damping (e.g., 0.0%)</figcaption>
+					</td>
+					<td>
+						<img src="imi/sim_highdamp.png" alt="High Damping" width="400vw" />
+						<figcaption>High Damping (e.g., 70%)</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
 
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+		laborum.
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="imi/t3_sphere_5k.png" width="400px"/>
-				  <figcaption>sphere.json at default ks</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="imi/t3_sphere_50k.png" width="400px"/>
-				  <figcaption>sphere.json at ks = 50000</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="imi/t3_sphere_500.png" width="400px"/>
-				  <figcaption>sphere.json at 500 ks</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="imi/t3_plan.png" width="400px"/>
-				  <figcaption>Cloth resting nicely on the plane in plane.json</figcaption>
-				</td>
-			  </tr>
+				<tr>
+					<td style="text-align: center;">
+						<img src="imi/t3_sphere_5k.png" width="400px" />
+						<figcaption>sphere.json at default ks</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="imi/t3_sphere_50k.png" width="400px" />
+						<figcaption>sphere.json at ks = 50000</figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: center;">
+						<img src="imi/t3_sphere_500.png" width="400px" />
+						<figcaption>sphere.json at 500 ks</figcaption>
+					</td>
+					<td style="text-align: center;">
+						<img src="imi/t3_plan.png" width="400px" />
+						<figcaption>Cloth resting nicely on the plane in plane.json</figcaption>
+					</td>
+				</tr>
 			</table>
 		</div>
 		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+		laborum.
 
 		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+		laborum.
+	</div>
+</body>
 
-		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
-	</body>
 </html>
