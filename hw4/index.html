@@ -34,30 +34,24 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-kkboomer/hw4/index.html">https://cal-cs184-student.github.io/hw-webpages-kkboomer/hw4/index.html</a>
 
 		<br>
 
-		Link to GitHub repository: (TODO) <a
-			href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a
+			href="https://github.com/cal-cs184-student/hw4-clothsim-glasses-cleaner-1">https://github.com/cal-cs184-student/hw4-clothsim-glasses-cleaner-1</a>
 
-		<figure>
-			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%" />
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
 
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole.
-		Share your thoughts on what interesting things you've learned from completing the homework.
-
 
 		Over the past few weeks I have implemented the basic framework that is capable of simulating cloth physics and
 		how
-		it interacts with light, objects, and itself.
+		it interacts with light, objects, and itself. It was cool to see how much regular kinematics from intro physics actually applies here,
+		and it was cool to see how shaders are written in their own language.
 
 
 
@@ -337,7 +331,7 @@
 							cloth to ripple and bunch up into a tight, incredibly wrinkled pile.</figcaption>
 					</td>
 					<td>
-						<img src="imi/t4ks50000.png" alt="High ks Fold" width="400vw" />
+						<img src="imi/t4ks50k.png" alt="High ks Fold" width="400vw" />
 						<figcaption><strong>High <code>ks</code> (e.g., 50,000 N/m)</strong><br>The rigid cloth resists
 							bending, resulting in large, stiff, overarching folds rather than tight crumples.
 						</figcaption>
@@ -346,12 +340,162 @@
 			</table>
 		</div>
 
-		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-		magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-		consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-		pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-		laborum.
+		<h3>Part 5: Shaders</h3>
+
+		<h4>Vertex and Fragment Shaders</h4>
+		<p>A shader program is a highly specialized, isolated program designed to execute in parallel on the GPU,
+			allowing us to vastly accelerate graphics rendering. In the context of the OpenGL pipeline, we primarily
+			work with two distinct but deeply connected types of shaders: vertex shaders and fragment shaders.</p>
+
+		<ul>
+			<li><strong>Vertex Shaders:</strong> These shaders act as the first step in the pipeline, processing the
+				individual vertices of a 3D model. They apply mathematical transformations to modify geometric
+				properties such as position and normal vectors. The vertex shader ultimately writes the final
+				transformed 3D screen coordinates to the built-in <code>gl_Position</code> variable, while
+				simultaneously passing other varying attributes (like UV coordinates and normals) down the pipeline for
+				later use.</li>
+			<li><strong>Fragment Shaders:</strong> After the modified geometry is rasterized (converted into a grid of
+				discrete pixels, or "fragments"), the fragment shader takes over. It receives the interpolated geometric
+				attributes passed down by the vertex shader and uses them to compute the final visual properties of that
+				specific pixel. This is where lighting equations, textures, and material colors are calculated before
+				the final RGBA value is written to <code>out_color</code>.</li>
+		</ul>
+
+		<h4>The Blinn-Phong Shading Model</h4>
+		<p>In the Blinn-Phong shading model, the final light output is calculated as the sum of three distinct lighting
+			components: ambient, diffuse, and specular ($L = L_a + L_d + L_s$).</p>
+		<ul>
+			<li><strong>Ambient Light:</strong> This is a constant, flat color applied to the entire object. It
+				simulates the base level of scattered light in an environment, ensuring that shadows are never 100%
+				pitch black.</li>
+			<li><strong>Diffuse Light:</strong> This represents the matte, base color of the object. Its brightness is
+				determined by the angle between the surface normal vector and the incoming light source vector,
+				calculated using the dot product.</li>
+			<li><strong>Specular Highlight:</strong> This component is responsible for the bright, shiny reflections on
+				the surface. It relies on the camera's viewing angle and the "half-vector" (the vector perfectly
+				bisecting the view direction and the light direction) to determine the intensity of the glare.</li>
+		</ul>
+
+		<div align="center">
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/ambient.png" alt="Ambient Only" width="400vw" />
+						<figcaption>Ambient Component Only</figcaption>
+					</td>
+					<td>
+						<img src="imi/diffuse.png" alt="Diffuse Only" width="400vw" />
+						<figcaption>Diffuse Component Only</figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<img src="imi/specular.png" alt="Specular Only" width="400vw" />
+						<figcaption>Specular Component Only</figcaption>
+					</td>
+					<td>
+						<img src="imi/phong_all.png" alt="Full Blinn-Phong" width="400vw" />
+						<figcaption>Full Blinn-Phong Model</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br><br>
+
+		<h4>Texture Mapping</h4>
+		<p>For texture mapping, the vertex shader passes the 2D texture coordinates (<code>u, v</code>) down to the
+			fragment shader. We then use the built-in GLSL <code>texture()</code> function to sample our custom image at
+			those specific coordinates, setting <code>out_color</code> to exactly match the pixel color pulled from the
+			texture map.</p>
+
+		<div align="center">
+			<img src="imi/texture.png" alt="Custom Texture" width="600vw" />
+			<figcaption>Custom Texture Mapping Rendering (enjoy the old meme)</figcaption>
+		</div>
+
+		<br><br>
+
+		<h4>Bump Mapping vs. Displacement Mapping</h4>
+		<p>Both of these shaders aim to create the appearance of geometric depth and physical texture, but they go about
+			it in fundamentally different ways.</p>
+
+		<p><strong>Bump Mapping (The Illusion):</strong> This shader operates strictly at the fragment level. We
+			calculate the height gradients from a texture map to physically tilt the normal vectors. This alters how the
+			light reflects off the surface, creating the optical illusion of bumps and ridges while keeping the
+			underlying 3D geometry perfectly flat and unchanged.</p>
+
+		<p><strong>Displacement Mapping (The Reality):</strong> This approach performs the same normal-vector tilting as
+			bump mapping, but it additionally operates at the vertex level. It reads the height map texture and
+			physically moves the positions of the mesh vertices outward along their normal vectors to create genuine 3D
+			geometry.</p>
+
+		<p>Because of this difference, displacement mapping looks highly distorted on lower-resolution meshes (like the
+			<code>-o 16 -a 16</code> sphere) because there simply are not enough vertices to smoothly represent the
+			physical changes dictated by the texture. Increasing the resolution to 128 improves the silhouette, allowing
+			the geometry to better match the texture's details. Conversely, bump mapping looks nearly identical at both
+			resolutions because it relies on per-pixel lighting calculations, completely bypassing the vertex
+			limitations.</p>
+
+			<p>All rendering is done with texture3.png from the included files</p>
+
+		<div align="center">
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/bumpcloth.png" alt="Bump on Cloth" width="300vw" />
+						<figcaption>Bump Mapping (Cloth on Sphere)</figcaption>
+					</td>
+					<td>
+						<img src="imi/bump16.png" alt="Bump 16x16" width="300vw" />
+						<figcaption>Bump Mapping (Sphere 16x16)</figcaption>
+					</td>
+					<td>
+						<img src="imi/bump128.png" alt="Bump 128x128" width="300vw" />
+						<figcaption>Bump Mapping (Sphere 128x128)</figcaption>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<img src="imi/displace16.png" alt="Displacement 16x16" width="300vw" />
+						<figcaption>Displacement Mapping (Sphere 16x16)<br><i>Notice the jagged, blocky geometry.</i>
+						</figcaption>
+					</td>
+					<td>
+						<img src="imi/displace128.png" alt="Displacement 128x128" width="300vw" />
+						<figcaption>Displacement Mapping (Sphere 128x128)<br><i>The extra vertices allow for smoother
+								physical warping.</i></figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<br><br>
+
+		<h4>Environment-Mapped Reflections</h4>
+		<p>To replicate a perfect mirror surface, we calculate the outgoing camera ray (the direction vector pointing
+			from the camera to the current fragment). We then use the built-in GLSL <code>reflect()</code> function to
+			mathematically bounce that ray off the surface normal. Finally, we use that reflected directional vector to
+			sample the environmental cubemap texture, effectively projecting the surrounding skybox onto the surface of
+			the cloth.</p>
+
+		<div align="center">
+			<table style="width: 100%; text-align: center;">
+				<tr>
+					<td>
+						<img src="imi/spheredraped.png" alt="Mirror Cloth" width="400vw" />
+						<figcaption>Mirror Shader on Cloth</figcaption>
+					</td>
+					<td>
+						<img src="imi/spheremirror.png" alt="Mirror Sphere" width="400vw" />
+						<figcaption>Mirror Shader on Sphere</figcaption>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
 	</div>
 </body>
 
